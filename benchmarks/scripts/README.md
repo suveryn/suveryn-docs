@@ -1,6 +1,6 @@
 # Benchmark scripts
 
-These are the scripts behind the [October 2026 hardware benchmark](../2026-10-hardware-benchmark.md). They are standalone measurement code, not part of suveryn-core.
+These are the scripts behind the [October 2026 hardware benchmark](../2026-10-hardware-benchmark.md). They are standalone measurement code, not part of [suveryn-core](https://github.com/suveryn/suveryn-core).
 
 ## Requirements
 
