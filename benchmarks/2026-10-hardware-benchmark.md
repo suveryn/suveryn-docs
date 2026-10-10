@@ -68,6 +68,12 @@ This depends on the software choices in the next section: summaries queued at up
 
 This is an estimate. We did not test 48 GB cards.
 
+### GPU licensing
+
+The on-prem specs are for an appliance in the office. NVIDIA's GeForce driver licence (RTX 4090 class cards) does not allow datacenter deployment, so a hosted or datacenter installation of Sūveryn needs a datacenter-class GPU (for example an L40S); we have not measured those. Renting a GeForce card from a cloud provider for development is a matter between that provider and NVIDIA.
+
+The CUDA libraries that PyTorch installs are proprietary NVIDIA software, redistributed under NVIDIA's licence, separately from Sūveryn's open-source code.
+
 ## Server configuration
 
 We used this llama-server command for the multi-user and long-document tests:
@@ -269,4 +275,4 @@ All of these numbers come from one RTX 4090 on RunPod, from mostly synthetic doc
 | Scripts | [`scripts/`](scripts/) |
 | Data | Synthetic Dutch deeds (fictional names and numbers), plus one real scanned report and two real deeds, all used with the owner's permission and deleted from the pod after each run. The real documents are not published. |
 
-These are standalone measurements, not part of suveryn-core.
+These are standalone measurements, not part of [suveryn-core](https://github.com/suveryn/suveryn-core), which uses the configuration and models recommended here.
