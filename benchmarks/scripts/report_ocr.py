@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sūveryn Labs Ltd.
 """Compare baseline Docling+Tesseract OCR with ocr_fast on your own scanned PDF; save Markdown + timings.
     export REPORT_PDF=work/report.pdf          # your own document; it is not part of this repository
     taskset -c 0-7  python report_ocr.py baseline 8

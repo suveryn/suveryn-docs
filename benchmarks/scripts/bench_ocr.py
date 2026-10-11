@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sūveryn Labs Ltd.
 """Compare baseline Docling+Tesseract OCR with ocr_fast (parallel OCRmyPDF + Docling do_ocr=False).
 
 Run inside /workspace/bench (needs deed_scan.pdf + ground_truth.json from gen_doc.py):
