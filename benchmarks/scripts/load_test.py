@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sūveryn Labs Ltd.
 """Concurrent users against llama-server, using the text of your own report (from report_ocr.py).
     python load_test.py prep    # builds prompts from work/md_fast_8.md (bge-m3 retrieval), then exits
     python load_test.py run     # runs the concurrency scenarios, writes work/load_results.json
