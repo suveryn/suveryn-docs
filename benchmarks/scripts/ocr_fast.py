@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sūveryn Labs Ltd.
 """Fast OCR front-end for Docling (standalone benchmark code, not suveryn-core).
 
 Baseline: Docling runs Tesseract itself, one page at a time, on every page
