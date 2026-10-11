@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sūveryn Labs Ltd.
 # End-to-end pipeline benchmark: Docling+Tesseract -> HybridChunker -> bge-m3 retrieval -> llama-server
 # usage: python bench.py <pdf> <runs> <label>
 import json, sys, time, threading, subprocess, re, difflib, os

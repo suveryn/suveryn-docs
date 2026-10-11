@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sūveryn Labs Ltd.
 """Generate FICTITIOUS born-digital Dutch commercial real-estate deeds for long-document tests.
 All names, companies, numbers are invented.
     python gen_long.py   -> long60.pdf (~60 p) + c1..c4.pdf (~20 p) + long_truth.json

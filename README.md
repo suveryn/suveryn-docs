@@ -16,3 +16,5 @@ Related repositories:
 ## Licence
 
 The documentation in this repository is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); the full text is in [LICENSE](LICENSE).
+
+The code is not: the benchmark scripts in [`benchmarks/scripts/`](benchmarks/scripts/) are licensed under Apache-2.0 ([their LICENSE](benchmarks/scripts/LICENSE)), as Creative Commons advises against its licences for software.
