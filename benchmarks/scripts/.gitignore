@@ -1,0 +1,8 @@
+# Everything the scripts write here stays out of this public repository: your own document and its
+# full extracted text (work/), and the generated test documents and results.
+work/
+*.pdf
+*.json
+*.md
+!README.md
+__pycache__/
