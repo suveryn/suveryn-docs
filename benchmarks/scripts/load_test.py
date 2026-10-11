@@ -81,8 +81,8 @@ results += [scenario("1 qa", Q[:1]), scenario("2 qa", Q[:2]), scenario("4 qa", Q
 
 # 2 users asking questions while a new 38-page document is being OCR'd (CPU 0-7 + Docling on the GPU)
 peak["mib"] = 0; t = time.perf_counter()
-ocr = subprocess.Popen(f"taskset -c 0-7 python ocr_fast.py {os.environ.get('REPORT_PDF', 'work/report.pdf')} --lang eng --jobs 8",
-                       shell=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+ocr = subprocess.Popen(["taskset", "-c", "0-7", sys.executable, "ocr_fast.py", os.environ.get("REPORT_PDF", "work/report.pdf"),
+                        "--lang", "eng", "--jobs", "8"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
 qa_during = []
 while ocr.poll() is None:
     th = [threading.Thread(target=call, args=(k, p, m, qa_during)) for k, p, m in Q[:2]]
