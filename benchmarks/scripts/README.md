@@ -33,3 +33,7 @@ These are the scripts behind the [October 2026 hardware benchmark](../2026-10-ha
 | `long_tests.py` | `cache`: the prompt-caching scenarios. `long`: 60-page summary, one prompt versus section by section. |
 
 All test documents generated here are fictional. `report_ocr.py` and `load_test.py` work on a document you provide yourself, in `work/`. Keep real documents out of this repository: `.gitignore` here keeps `work/` and every generated PDF, Markdown and JSON file out of git. `ocr_fast.py` keeps its intermediate files (a searchable copy is the full document) in a private `work/tmp` folder, never in `/tmp`, and deletes them after each document.
+
+## Licence
+
+These scripts are licensed under Apache-2.0 (see [LICENSE](LICENSE)); each file says so in its `SPDX-License-Identifier` line. The rest of this repository, the documentation, is CC BY 4.0.
