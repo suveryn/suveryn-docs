@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sūveryn Labs Ltd.
 # Generates a FICTITIOUS Dutch notarial sale deed as a scanned (image-only) PDF.
 # All names, addresses, numbers are invented. Writes deed_scan.pdf + ground_truth.json
 import json, random

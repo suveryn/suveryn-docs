@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sūveryn Labs Ltd.
 """Test 3 (prompt caching, multi-user) and test 2 (long-document summarisation: single pass vs map-reduce).
 Needs long60.md, c1..c4.md (from gen_long.py + ocr_fast) and long_truth.json in the cwd, and a running
 llama-server (Mistral Small 3.2 24B) with -np 4 -kvu and a large shared context (-c 81920).
