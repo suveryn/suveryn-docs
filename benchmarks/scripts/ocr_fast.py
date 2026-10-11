@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import tempfile
 import time
 from dataclasses import dataclass, field
@@ -78,6 +79,13 @@ def build_converter(device: str = "cuda", threads: int = 8):
     return conv
 
 
+def private_tmpdir(base: Path = Path("work") / "tmp") -> Path:
+    """A fresh 0700 folder under ``base`` (not /tmp), for one document's intermediate files."""
+    base.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.chmod(base, 0o700)
+    return Path(tempfile.mkdtemp(prefix="ocrfast_", dir=base)).resolve()
+
+
 def extract(pdf: Path, converter, lang: str = "nld+fra", jobs: int | None = None,
             deskew: bool = False, rotate: bool = False, workdir: Path | None = None):
     """Return (DoclingDocument, OcrReport, searchable_pdf_path or None if it was a temp file)."""
@@ -89,11 +97,15 @@ def extract(pdf: Path, converter, lang: str = "nld+fra", jobs: int | None = None
     rep.ocr_pages = rep.pages - rep.text_pages
     rep.timings["classify"] = time.perf_counter() - t
 
-    # Without an explicit workdir the searchable copy is temporary and always deleted:
-    # it holds the full document text, so it must not linger in /tmp.
-    tmp = None if workdir else tempfile.TemporaryDirectory(prefix="ocrfast_")
+    # Without an explicit workdir the searchable copy is temporary and always deleted: it holds the
+    # full document text, so it must not go to /tmp. It goes to a private (0700) folder under
+    # ./work/tmp instead, and OCRmyPDF's own work files (Ghostscript, Tesseract) follow through TMPDIR.
+    tmp = None if workdir else private_tmpdir()
+    saved_tmpdir = os.environ.get("TMPDIR"), tempfile.tempdir
+    if tmp:
+        os.environ["TMPDIR"] = tempfile.tempdir = str(tmp)
     try:
-        searchable = (workdir or Path(tmp.name)) / (pdf.stem + ".ocr.pdf")
+        searchable = (workdir or tmp) / (pdf.stem + ".ocr.pdf")
         t = time.perf_counter()
         if rep.ocr_pages:
             ocr_to_searchable_pdf(pdf, searchable, lang, jobs, deskew, rotate)
@@ -106,7 +118,12 @@ def extract(pdf: Path, converter, lang: str = "nld+fra", jobs: int | None = None
         rep.timings["docling"] = time.perf_counter() - t
     finally:
         if tmp:
-            tmp.cleanup()
+            if saved_tmpdir[0] is None:
+                os.environ.pop("TMPDIR", None)
+            else:
+                os.environ["TMPDIR"] = saved_tmpdir[0]
+            tempfile.tempdir = saved_tmpdir[1]
+            shutil.rmtree(tmp, ignore_errors=True)
     rep.timings["total"] = sum(rep.timings.values())
     return doc, rep, (None if tmp else searchable)
 
