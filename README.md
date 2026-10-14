@@ -1,6 +1,6 @@
 # Sūveryn documentation
 
-Installation, administration and connector-development documentation for Sūveryn.
+Installation, administration and connector-development documentation for sūveryn.
 
 Related repositories:
 
