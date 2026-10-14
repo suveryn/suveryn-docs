@@ -70,9 +70,9 @@ This is an estimate. We did not test 48 GB cards.
 
 ### GPU licensing
 
-The on-prem specs are for an appliance in the office. NVIDIA's GeForce driver licence (RTX 4090 class cards) does not allow datacenter deployment, so a hosted or datacenter installation of Sūveryn needs a datacenter-class GPU (for example an L40S); we have not measured those. Renting a GeForce card from a cloud provider for development is a matter between that provider and NVIDIA.
+The on-prem specs are for an appliance in the office. NVIDIA's GeForce driver licence (RTX 4090 class cards) does not allow datacenter deployment, so a hosted or datacenter installation of sūveryn needs a datacenter-class GPU (for example an L40S); we have not measured those. Renting a GeForce card from a cloud provider for development is a matter between that provider and NVIDIA.
 
-The CUDA libraries that PyTorch installs are proprietary NVIDIA software, redistributed under NVIDIA's licence, separately from Sūveryn's open-source code.
+The CUDA libraries that PyTorch installs are proprietary NVIDIA software, redistributed under NVIDIA's licence, separately from sūveryn's open-source code.
 
 ## Server configuration
 
