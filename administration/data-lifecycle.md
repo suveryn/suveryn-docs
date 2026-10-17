@@ -20,7 +20,7 @@ Everything an office puts into sūveryn lives on the appliance, in one PostgreSQ
 | Logs: requests by method, path and status; counts and kinds; audit events with ids | The system journal | Capped at 1 GB; the oldest entries make way for new ones. No document text is ever logged |
 | The model server's prompt cache: recent prompts, which include document passages | GPU memory and RAM of the model server | Until pushed out by newer prompts, or until the model server restarts |
 
-The office chooses two of the periods above, at set-up or in the administrator's dashboard: how long closed cases are kept, and how long saved conversations are kept. Nothing is chosen for the office: until it chooses, cases and conversations are kept until someone deletes them.
+The office chooses two of the periods above in the administrator's dashboard: how long closed cases are kept, and how long saved conversations are kept. The web setup does not ask (it throws as few hurdles as possible), and nothing is chosen for the office: until an administrator chooses, cases and conversations are kept until someone deletes them.
 
 ## What deleting guarantees
 
@@ -46,8 +46,8 @@ There are three ways something leaves sūveryn: a person deletes it, it belongs 
 
 | Data | Default | Range | Where it is set |
 |---|---|---|---|
-| Closed cases | Until deleted by hand (`manual`) | 6 months, 1 year, 5 years, manual | Set-up (`--cases-keep`, `CASES_KEEP`), then the administrator's dashboard |
-| Saved conversations | Until deleted by hand (`manual`) | 6 months, 1 year, 5 years, manual | Set-up (`--conversations-keep`, `CONVERSATIONS_KEEP`); the dashboard later |
+| Closed cases | Until deleted by hand (`manual`) | 6 months, 1 year, 5 years, manual | The administrator's dashboard (office settings); the initial value from provisioning (`--cases-keep`, `CASES_KEEP`) |
+| Saved conversations | Until deleted by hand (`manual`) | 6 months, 1 year, 5 years, manual | The administrator's dashboard (office settings); the initial value from provisioning (`--conversations-keep`, `CONVERSATIONS_KEEP`) |
 | Case access log | 180 days | fixed | — |
 | Keycloak sign-in and administration events | 180 days | fixed | The realm |
 | System journal | 1 GB, oldest first | fixed | The image |
