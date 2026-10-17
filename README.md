@@ -11,6 +11,7 @@ Related repositories:
 
 ## Contents
 
+- [Data lifecycle](administration/data-lifecycle.md): what sūveryn keeps, for how long, and what deleting guarantees. The policy every claim about deletion follows.
 - [Benchmarks](benchmarks/): hardware and pipeline measurements for development pods and on-prem appliances.
 
 ## Licence
