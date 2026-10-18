@@ -16,6 +16,7 @@ Everything an office puts into sūveryn lives on the appliance, in one PostgreSQ
 | The access log of a case: who did what and when, with ids only, never text | Database (`case_events`) | 180 days, then deleted; with the case when the case is deleted |
 | Saved conversations: questions, answers, the passages they cite, attachment names | Database (`conversations`) | Until their owner deletes them, until the case they are in is deleted, or until the office's conversation keep period passes (below) |
 | Usage: per model call, who, when, which model, how many tokens; no text | Database (`token_usage`) | Indefinitely; it contains no content |
+| A person's picture (avatar), as the appliance re-encoded it: small, square, without metadata | Database (`user_avatars`) | Until the person removes it, an administrator removes it, or the account's data is deleted |
 | Accounts, password hashes, second factors, sessions | Keycloak's database | Managed by Keycloak; sign-in and administration events 180 days |
 | Logs: requests by method, path and status; counts and kinds; audit events with ids | The system journal | Capped at 1 GB; the oldest entries make way for new ones. No document text is ever logged |
 | The model server's prompt cache: recent prompts, which include document passages | GPU memory and RAM of the model server | Until pushed out by newer prompts, or until the model server restarts |
