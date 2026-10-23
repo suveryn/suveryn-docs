@@ -2,7 +2,7 @@
 
 This page is the policy. Everything sūveryn says about deletion, in the product, in its documentation and in sales material, follows it. It was decided on 17 October 2026 (suveryn-tracker#31) and changes only with a new decision recorded here.
 
-The one-paragraph version: **deleting something in sūveryn removes it from sūveryn at once, for everyone, and it cannot be found, searched, cited or shown again. Traces of it in the database's files are overwritten over time, in the ordinary course of the database's housekeeping. The release appliance's data disk is encrypted, so those traces are unreadable off the machine (the image installed today isn't encrypted yet: see below). Backups, once they exist, expire after their retention period, and a deleted item lives on in a backup only until that backup does.** Sūveryn does not claim secure or cryptographic erasure, because it has not built it. The reasoning is at the end.
+The one-paragraph version: **deleting something in sūveryn removes it from sūveryn at once, for everyone, and it cannot be found, searched, cited or shown again. Traces of it in the database's files are overwritten over time, in the ordinary course of the database's housekeeping. The release appliance's data disk is encrypted, so those traces are unreadable off the machine (the image installed today isn't encrypted yet: see below). Backups expire after their retention period, and a deleted item lives on in a backup only until that backup does.** Sūveryn does not claim secure or cryptographic erasure, because it has not built it. The reasoning is at the end.
 
 ## What sūveryn keeps
 
@@ -33,7 +33,7 @@ There are three ways something leaves sūveryn: a person deletes it, it belongs 
 
 **Off the machine, nothing**, once the data partition is encrypted. The release appliance's data partition is encrypted (LUKS2, unlocked by the machine's TPM or by the office's recovery key): that is the mkosi image ([`image/mkosi/README.md`](https://github.com/suveryn/suveryn-appliance/blob/main/image/mkosi/README.md)). The image that installs the services today (Packer) has one unencrypted ext4 disk: a disk taken out of it can be read. It is for test machines and must not hold an office's records; sūveryn does not claim encryption at rest for it. A disk taken out of the machine, a decommissioned server, a disk sent for repair: none of them yield anything, deleted or not. This is the protection that matters for the realistic threat, and it covers everything the database housekeeping cannot, including the search index, the logs and the write-ahead log.
 
-**In backups.** There are no backups yet (suveryn-tracker#33 builds them). The backup step in the web setup stores where backups will go and checks that the share answers; it does not make backups yet. When there are, a backup is a copy of the database as it was that day, encrypted for the office's offline recovery key; a document deleted after the backup was taken stays in that backup until the backup expires. The backup retention period is therefore the outer bound of this policy: "deleted" means "gone from the live system at once, and from every copy once the last backup that holds it has expired". A restore brings back only what was live at backup time.
+**In backups.** Every night the appliance writes a backup onto the office's USB disk or network share (suveryn-tracker#33): a copy of both databases and the office's settings as they were that night, encrypted for the office's offline recovery key, which the appliance itself doesn't have. A document deleted after the backup was taken stays in that backup until the backup expires. After each successful backup, those older than the retention period are deleted; the newest is always kept, and a failed night deletes nothing. The backup retention period is therefore the outer bound of this policy: "deleted" means "gone from the live system at once, and from every copy once the last backup that holds it has expired". A restore brings back only what was live at backup time.
 
 ## What is not covered, said plainly
 
@@ -53,7 +53,7 @@ There are three ways something leaves sūveryn: a person deletes it, it belongs 
 | Keycloak sign-in and administration events | 180 days | fixed | The realm |
 | System journal | 1 GB, oldest first | fixed | The image |
 | Usage records | 24 months per person, then the office's monthly totals only | whole months, 1 or more | The appliance's environment (`SUVERYN_USAGE_KEEP_MONTHS`) |
-| Backups | Not built yet | To be decided in suveryn-tracker#33 | — |
+| Backups | 30 days | 14 days, 30 days, 90 days, 1 year; the newest is always kept | The web setup's Backups step (`/etc/suveryn/backups.json`) |
 
 A conversation's keep period counts from its last change, and applies to conversations in cases as well as in personal spaces: a conversation inside a case that is kept for five years can still expire after one, if the office chose one year for conversations. Cases keep the documents, conversations keep the questions and answers; the office sets each.
 
