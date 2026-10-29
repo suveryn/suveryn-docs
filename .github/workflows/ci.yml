@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  docs:
+    name: Markdown lint + link check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Markdown lint
+        run: npx --yes markdownlint-cli2 "**/*.md"
+
+      - name: Check for broken links
+        # markdown-link-check (not linkinator): linkinator expects HTML-style crawling and reports a
+        # false 404 on this repo's directory-style relative links (e.g. "benchmarks/", "scripts/",
+        # which GitHub renders as folder links) — markdown-link-check resolves those correctly since
+        # it understands markdown links directly.
+        run: |
+          npm install --no-save markdown-link-check
+          find . -name "*.md" -not -path "./node_modules/*" -print0 \
+            | xargs -0 -n1 npx markdown-link-check --config .markdown-link-check.json
