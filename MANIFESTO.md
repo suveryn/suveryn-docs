@@ -4,7 +4,7 @@
 
 Right now, confidentiality-bound work has two bad options: send sensitive data into someone else's closed cloud and hope, or sit out the biggest productivity shift in a generation. Neither is good enough.
 
-Sūveryn is the third option: a secure, open application stack and virtual appliance, built on open-weight models and designed to run entirely on a customer's own premises, including in air-gapped environments.
+Sūveryn is the third option: a secure, open application stack and appliance, built on open-weight models and designed to run entirely on a customer's own premises, including in air-gapped environments.
 
 We thrive on a seemingly paradoxical idea: radical openness in service of confidentiality.
 
