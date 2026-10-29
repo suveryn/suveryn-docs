@@ -1,0 +1,14 @@
+{
+  // These docs are written as long-line prose and "compact" pipe tables by house style — MD013
+  // (line length) and MD060 (table pipe spacing/alignment) would mean reformatting every doc to a
+  // convention this repo doesn't use, not catching a real problem. MD031 (blank lines around
+  // fenced code) is off because several docs nest a code fence inside a list item's own text
+  // (benchmarks/scripts/README.md), which renders correctly without one. Everything else in
+  // markdownlint's default set stays on: broken headings, bad links, duplicate content, etc.
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD031": false,
+    "MD060": false
+  }
+}
