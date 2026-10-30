@@ -86,7 +86,7 @@ A fact is the unit everything else works on. Over a run it goes through states, 
 1. **Proposed.** A `read` step found it in the documents. The value is copied as the documents write it, with the passage it came from. The `kind` decides the check sūveryn runs on it: an `amount` or `date` that isn't in the cited passage is flagged for the person to look at.
 2. **Not established.** The documents didn't contain it. If an `ask` step covers it, the playbook asks a person; their answer becomes **proposed** too, marked as a person's, not the model's.
 3. **Confirmed.** At the checkpoint a person confirms, corrects or clears every fact. Only this makes a fact the case's. A cleared fact stays **not established**, by that person.
-4. **Superseded.** Every time a fact gets a new version, the old one is kept and marked superseded, pointing forward. If a run is cancelled, its confirmed facts go back to proposed the same way, so the history stays whole.
+4. **Superseded.** Every time a fact gets a new version, the old one is kept and marked superseded, pointing forward. A stopped run supersedes what it only read; a cancelled run supersedes everything it established, confirmed facts included. The rows stay, so the history is whole.
 
 Where a fact shows: in the thread, when the playbook asks about it; at the checkpoint, beside its passage, with the check's warning; in the panel next to the thread, with its state; in the summary, as one line with its sources. When a document a fact was read from is later deleted, the run is marked out of date, but the fact and its passage stay.
 
@@ -118,7 +118,7 @@ Every step has an `id` (lower case, digits, hyphens or underscores) and a `kind`
 
 ### `request`: ask for documents
 
-The playbook puts a question in the thread and waits until the case has the documents.
+The playbook puts a question in the thread and waits until the case has the documents. If the case already has them when the step comes up, the step is done at once and no question is asked.
 
 | Key | What it is |
 |---|---|
@@ -191,7 +191,7 @@ Beside the manifest, one JSON file per language in `text/` (`en.json`, `nl.json`
 
 ## What happens when it runs
 
-A run is a conversation with the routine. The playbook asks; people answer, in the case, in the run's language. The case shows that a playbook is running and what it waits for. A run can be paused and resumed by anyone who contributes to the case; stopped (what was confirmed stays, what was only read is dropped) or cancelled (confirmed facts go back to unconfirmed, the result is marked withdrawn) by whoever started it or the case manager. Every fact keeps every version it had — as read, as answered, as confirmed, by whom — and nothing is rewritten. One run of a playbook at a time per case.
+A run is a conversation with the routine. The playbook asks; people answer, in the case, in the run's language. The case shows that a playbook is running and what it waits for. A run can be paused and resumed by anyone who contributes to the case; stopped (what was confirmed stays, what was only read is dropped) or cancelled (nothing the run established counts any more, confirmed or not, and its result is marked withdrawn) by whoever started it or the case manager. Every fact keeps every version it had — as read, as answered, as confirmed, by whom — and nothing is rewritten. One run of a playbook at a time per case.
 
 ## Checking a file
 
