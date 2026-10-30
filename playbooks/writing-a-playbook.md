@@ -197,7 +197,7 @@ A run is a conversation with the routine. The playbook asks; people answer, in t
 
 The loader refuses a wrong file with the place and the reason, for example:
 
-```
+```text
 be_notary/mandate.yaml: 2 problem(s):
   steps: step 'summary' (produce): nothing is produced before a checkpoint; it needs one
   facts.3.kind: Input should be 'text', 'amount' or 'date'
