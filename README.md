@@ -2,7 +2,7 @@
 
 Website: [suveryn.com](https://www.suveryn.com)
 
-Installation, administration and connector-development documentation for sūveryn.
+Installation, administration, playbook-writing and connector-development documentation for sūveryn.
 
 Related repositories:
 
@@ -14,6 +14,7 @@ Related repositories:
 ## Contents
 
 - [Data lifecycle](administration/data-lifecycle.md): what sūveryn keeps, for how long, and what deleting guarantees. The policy every claim about deletion follows.
+- [Writing a playbook](playbooks/writing-a-playbook.md): the manifest file, step by step, for offices and partners that write their own routines. Kept in step with every release that changes the format.
 - [Benchmarks](benchmarks/): hardware and pipeline measurements for development pods and on-prem appliances.
 
 ## Licence
