@@ -2,5 +2,8 @@
   "retryOn429": true,
   "retryCount": 2,
   "timeout": "15s",
-  "aliveStatusCodes": [200, 206, 301, 302, 403]
+  "aliveStatusCodes": [200, 206, 301, 302, 403],
+  "ignorePatterns": [
+    { "pattern": "^https://github.com/suveryn/suveryn-handbook" }
+  ]
 }
