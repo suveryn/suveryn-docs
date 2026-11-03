@@ -12,13 +12,21 @@ The official deed-intake playbook, as shipped (comments shortened):
 manifest: 3
 id: playbook/be-notary/deed-intake
 pack: pack/be-notary
-version: "1.2"
+version: "1.3"
 name: Deed intake
 case_types: [sale]
 
 facts:
   - id: sellers
-    ask: the selling party or parties, as named in the agreement (full names as written)
+    ask: the selling party or parties, one entry per seller, as named in the agreement
+    kind: list
+    of:
+      - id: name
+        ask: the seller's full name as written (a company's name as written)
+      - id: address
+        ask: the seller's address as written
+      - id: register
+        ask: the seller's national register number (a company's enterprise number), as written
   - id: price
     ask: the sale price
     kind: amount
@@ -42,6 +50,10 @@ steps:
   - id: missing
     kind: ask
     facts: all
+  - id: deposit_within_price
+    kind: check
+    rule: deposit <= price
+  # … four more checks
   - id: confirm
     kind: checkpoint
     by: anyone_in_case
@@ -234,12 +246,15 @@ The server computes one comparison on the values as they stand and shows the res
 
 | Key | What it is |
 |---|---|
-| `rule` | One comparison: `sum(founders.shares) == shares`, `certified_amount == contribution`, `count(founders) >= 1`, `plan_date <= deed_date`. A side is a fact, the sum of a list's field, the count of a list's entries, or a number; both sides are of one kind (amount, number or date). Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`. Nothing else: no arithmetic, no and/or, no text. |
+| `rule` | One comparison: `sum(founders.shares) == shares`, `certified_amount == contribution`, `count(founders) >= 1`, `plan_date <= deed_date`, `latest(conditions.term) <= deed_deadline`. A side is a fact, the sum of a list's field, the count of a list's entries, the latest or the earliest date in a list's field (`latest(...)`, `earliest(...)`: "every condition's term falls before the deed" in one line; with no entries the check holds), or a number; both sides are of one kind (amount, number or date). Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`. Nothing else: no arithmetic, no and/or, no text. |
 
 ```yaml
   - id: shares_add_up
     kind: check
     rule: sum(founders.shares) == shares
+  - id: conditions_before_deed
+    kind: check
+    rule: latest(conditions.term) <= deed_deadline
 ```
 
 A result **holds**, **fails** (both sides as computed, so the notary sees 1050 against 1000) or is **open** when a value it needs is missing or gives no amount, number or date as written; it is recomputed whenever a value changes. A check comes after the read or ask steps that supply its facts. Its sentence per language is in the words file (`checks.<step id>`: "The founders' shares add up to the shares issued"); the file refuses a check without one.
