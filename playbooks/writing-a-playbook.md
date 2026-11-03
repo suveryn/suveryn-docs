@@ -157,6 +157,7 @@ The playbook puts a question in the thread and waits until the case has the docu
 |---|---|
 | `min` | How many uploaded documents the case needs before the step is done. Default 1. |
 | `allow_none` | `true` lets a person answer that there is no such document; the step is then skipped. Default `false`. |
+| `expects` | A name for what is asked (`bank_certificate`), unique among the routine's requests, so a `read` can be aimed at it. When a person answers a named request, the documents that came with the answer are recorded as its; with none attached, the case's uploaded documents no other request has yet. |
 
 The question's words come from the words file (`questions.<step id>`). After uploading, a person presses continue; sūveryn counts the case's uploaded documents.
 
@@ -166,9 +167,22 @@ The model reads the case's uploaded documents for the facts named and cites the 
 
 | Key | What it is |
 |---|---|
-| `facts` | Which facts to read: a list of ids, or `all`. Required. |
+| `facts` | Which facts to read: a list of ids, or `all`. Required. A fact is read by one `read` step; the loader refuses a second. |
+| `documents` | The names (`expects`) of the requests whose documents this read reads: `[bank_certificate]`. Without it the read is over every document in the case. Aimed only at requests a person said have no document, the read makes no model call: its facts are not established, and an `ask` step can ask about them. |
 
-Keep one `read` to about fifteen facts (a list counts as one); a routine with more needs several. A `read` step is one grounded model call whose answer must have the facts' shape; the model server enforces that shape, and an answer that still can't be read is asked for once more, then the run fails as "unreadable answer" and can be started again.
+Keep one `read` to about fifteen facts (a list counts as one); a routine with more needs several, each aimed at its own documents:
+
+```yaml
+steps:
+  - id: bank
+    kind: request
+    expects: bank_certificate
+    allow_none: true
+  - id: bank_read
+    kind: read
+    documents: [bank_certificate]
+    facts: [bank_certificate, certified_amount]
+``` A `read` step is one grounded model call whose answer must have the facts' shape; the model server enforces that shape, and an answer that still can't be read is asked for once more, then the run fails as "unreadable answer" and can be started again.
 
 ### `ask`: ask people about what wasn't found
 
@@ -240,4 +254,4 @@ Editors that understand JSON Schema (VS Code with the YAML extension, among othe
 
 ## What is not in the format yet
 
-Decisions and conditions (`when`), named document requests, checks on sums (the founders' contributions adding up to the total; the values are typed now, so this is next) and on documents that disagree, who may pass a checkpoint by role, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
+Decisions and conditions (`when`), checks on sums (the founders' contributions adding up to the total; the values are typed now, so this is next) and on documents that disagree, who may pass a checkpoint by role, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
