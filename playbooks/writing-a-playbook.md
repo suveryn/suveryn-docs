@@ -1,18 +1,18 @@
 # Writing a playbook
 
-A playbook is a routine sūveryn follows in a case: it asks for documents, reads them, asks about what it couldn't find, waits for a person to confirm every fact, and writes a result. You write a playbook as one YAML file, the **manifest**, plus its words in each language. This page is the reference for that file. It describes **manifest format 2** as sūveryn reads it today and is kept up to date with every release that changes the format; the machine-readable version is the JSON Schema in [`suveryn-core/packages/playbooks/schema/`](https://github.com/suveryn/suveryn-core/tree/main/packages/playbooks/schema), which editors use for completion and checking.
+A playbook is a routine sūveryn follows in a case: it asks for documents, reads them, asks about what it couldn't find, waits for a person to confirm every fact, and writes a result. You write a playbook as one YAML file, the **manifest**, plus its words in each language. This page is the reference for that file. It describes **manifest format 3** as sūveryn reads it today (format 2 plus lists and numbers; a format-2 file loads unchanged) and is kept up to date with every release that changes the format; the machine-readable version is the JSON Schema in [`suveryn-core/packages/playbooks/schema/`](https://github.com/suveryn/suveryn-core/tree/main/packages/playbooks/schema), which editors use for completion and checking.
 
-Two rules shape everything below. The playbook decides the order of steps; the model only reads documents inside a `read` step and never chooses what comes next. And a fact is never confirmed by the model: only a person does that, at a checkpoint.
+Three rules shape everything below. The playbook decides the order of steps; the model only reads documents inside a `read` step and never chooses what comes next. A fact is never confirmed by the model: only a person does that, at a checkpoint. And the model answers in the shape the facts describe, no other: sūveryn derives that shape from the manifest and the model server holds the model to it, so a value is never taken by position or guessed from a stray line.
 
 ## A complete example
 
 The official deed-intake playbook, as shipped (comments shortened):
 
 ```yaml
-manifest: 2
+manifest: 3
 id: playbook/be-notary/deed-intake
 pack: pack/be-notary
-version: "1.1"
+version: "1.2"
 name: Deed intake
 case_types: [sale]
 
@@ -28,8 +28,9 @@ facts:
   # … eleven more
 
 instructions: >-
-  You are preparing the intake of a sale for a notarial deed. Read the excerpts and fill in the
-  table below … Answer with the table only, in the language of the documents.
+  You are preparing the intake of a sale for a notarial deed. Read the excerpts and give every fact
+  below as the documents write it … A fact the excerpts do not contain is null: never guess …
+  Answer in the language of the documents.
 
 steps:
   - id: agreement
@@ -55,14 +56,14 @@ Read it top to bottom: who the playbook is (`id`, `pack`, `version`), where it f
 
 | Key | Required | What it is |
 |---|---|---|
-| `manifest` | yes | The format version: `1` or `2`. Write `2`. A format-1 file has no `steps` and runs as read → checkpoint → produce. |
+| `manifest` | yes | The format version: `2` or `3`. Write `3`. Format 3 adds the kinds `number` and `list`; a format-2 file loads as it is, and a format-2 file that uses either kind is refused with the fact named. |
 | `id` | yes | `playbook/<pack>/<name>`, lower case, digits and hyphens. Never changes once published: it ends up in every run's record, in every result document, and in the licence. |
 | `pack` | yes | `pack/<profession-jurisdiction>`, for example `pack/be-notary`. The `id` must start with `playbook/<that pack>/`. |
 | `version` | yes | `major.minor`, in quotes (`"1.1"`). A change that changes results is a new minor version; a change that makes an old run unreadable is a new major one. Every run records the version it ran under. |
 | `name` | yes | The English name; it becomes the result document's file name ("Deed intake 2026/0417 (1.1).txt"). |
 | `case_types` | yes | The case types the playbook fits, one or more: `sale`, `company-formation`, `estate`, `gift`, `marriage-contract` for notaries. It shows only in cases of those types. |
 | `facts` | yes | What the playbook wants to know; see below. At most 100. |
-| `instructions` | yes | What the model is told before it reads the documents, in English, up to 4 000 characters. Do **not** write the answer table: sūveryn appends it. |
+| `instructions` | yes | What the model is told before it reads the documents, in English, up to 4 000 characters. Do **not** describe the answer's shape: sūveryn derives it from the facts and appends it. |
 | `steps` | format 2 | The routine; see below. At most 50. |
 
 Any key not listed here is an error. sūveryn refuses a file it doesn't fully understand rather than guess: every error names the file, the step or the field, and what is wrong.
@@ -75,15 +76,47 @@ A fact is one thing the playbook needs to know. Each has:
 |---|---|---|
 | `id` | yes | Lower-case letters, digits and underscores, starting with a letter (`agreement_date`). Stable: labels, questions and the run's record key on it. |
 | `ask` | yes | What the fact is, in the words the model gets, in English. Be concrete: "the date by which the notarial deed must be signed", not "deadline". |
-| `kind` | no | `text` (default), `amount` or `date`. Decides which checks apply to the value the model reads. |
+| `kind` | no | `text` (default), `amount`, `date`, `number`, or `list`. Decides which checks apply to the value the model reads; `list` says the fact has several entries (below). |
+| `of` | list only | What one entry is: a list of fields (each with `id`, `ask` and a plain `kind`), or one plain kind (`text`, `amount`, `date`, `number`) when each entry is a single value. |
 
-Every fact gets a label in each language in the words file (below). Today a fact is one value; lists of records (several founders, each with name, shares and contribution) and typed numbers are the next format.
+Every fact gets a label in each language in the words file (below); a list's fields too.
+
+### Lists and numbers
+
+A deed's parties don't fit one line. Format 3 lets a fact hold several entries:
+
+```yaml
+  - id: founders
+    ask: the founders, one entry per founder
+    kind: list
+    of:
+      - id: name
+        ask: the founder's full name as written
+      - id: shares
+        ask: the number of shares this founder takes
+        kind: number
+      - id: contribution
+        ask: this founder's contribution in money
+        kind: amount
+  - id: conditions
+    ask: the conditions attached to the deed, one entry each
+    kind: list
+    of: text
+```
+
+The model gives one entry per founder the documents name, in the order the documents give them, and `[]` when they name none. Each value of an entry is a fact of its own, named by **path**: `founders[1].name`, `founders[2].contribution`, `conditions[1]`. Everything that works on a fact works on a path: the checks by kind, the checkpoint's card, a person's answer, the summary's line, the run's record. The list's own id (`founders`) names the list as a whole; it is what the playbook asks about when the documents name no entries ("The documents name no founders. Who are they?"), and the first entry a person gives answers it.
+
+A list holds records of plain values, or plain values, never lists: a deed has several parties each with a few details and no deeper, and a file an office can still write by hand stays one level deep. At most 20 fields per entry and 50 entries per list.
+
+`number` is a figure without currency: a count, a share, a percentage. It is checked by meaning against the cited passage like an amount, short figures included ("3 aandelen"), which the chat's own figure check leaves alone as too ambiguous; in a playbook you asked for a count, so it is checked.
+
+People add entries. At a checkpoint, a list the documents named nothing of shows *Add* instead of *Fill in*, with one field per value of the entry; a list with entries offers one more under *More*. In words, "a third founder, Anna Peeters, 400 shares" adds one. Removing an entry is clearing its values.
 
 ### What a fact does
 
 A fact is the unit everything else works on. Over a run it goes through states, and every state is kept: nothing is overwritten, so a person can always see what the model read, what someone answered, and what was finally confirmed, and by whom.
 
-1. **Proposed.** A `read` step found it in the documents. The value is copied as the documents write it, with the passage it came from. The `kind` decides the check sūveryn runs on it: an `amount` or `date` that isn't in the cited passage is flagged for the person to look at.
+1. **Proposed.** A `read` step found it in the documents. The value is copied as the documents write it, with the passage it came from. The `kind` decides the check sūveryn runs on it: an `amount`, `date` or `number` that isn't in the cited passage is flagged for the person to look at.
 2. **Not established.** The documents didn't contain it. If an `ask` step covers it, the playbook asks a person; their answer becomes **proposed** too, marked as a person's, not the model's.
 3. **Confirmed.** At the checkpoint a person confirms, corrects or clears every fact. Only this makes a fact the case's. A cleared fact stays **not established**, by that person.
 4. **Superseded.** Every time a fact gets a new version, the old one is kept and marked superseded, pointing forward. A stopped run supersedes what it only read; a cancelled run supersedes everything it established, confirmed facts included. The rows stay, so the history is whole.
@@ -135,7 +168,7 @@ The model reads the case's uploaded documents for the facts named and cites the 
 |---|---|
 | `facts` | Which facts to read: a list of ids, or `all`. Required. |
 
-Keep one `read` to about fifteen facts; a routine with more needs several. A `read` step is one grounded model call; an answer that isn't the table is asked for once more, then the run fails as "unreadable answer" and can be started again.
+Keep one `read` to about fifteen facts (a list counts as one); a routine with more needs several. A `read` step is one grounded model call whose answer must have the facts' shape; the model server enforces that shape, and an answer that still can't be read is asked for once more, then the run fails as "unreadable answer" and can be started again.
 
 ### `ask`: ask people about what wasn't found
 
@@ -187,7 +220,7 @@ Beside the manifest, one JSON file per language in `text/` (`en.json`, `nl.json`
 }
 ```
 
-`labels` needs an entry for every fact. `questions` needs an entry for every `request` step and every `ask` step (a template with `{label}`, or one entry per fact as `"missing.price": "…"`). The model never words a question: what people read is what you wrote.
+`labels` needs an entry for every fact and, for a list, for every field as `"<list id>.<field id>"` (`"founders.name": "Name"`); an entry's values are labelled from these: "Founder(s) 2 · Name". `questions` needs an entry for every `request` step and every `ask` step (a template with `{label}`, or one entry per fact as `"missing.price": "…"`; for a list, `"missing.founders"` is asked when the documents name no entries). The model never words a question: what people read is what you wrote.
 
 ## What happens when it runs
 
@@ -207,4 +240,4 @@ Editors that understand JSON Schema (VS Code with the YAML extension, among othe
 
 ## What is not in the format yet
 
-Decisions and conditions (`when`), named document requests, repeating a block per founder, checks on sums and on documents that disagree, who may pass a checkpoint by role, documents from the office's own templates, and facts that are lists or numbers. They arrive in later formats; a format-2 file keeps loading as it is.
+Decisions and conditions (`when`), named document requests, checks on sums (the founders' contributions adding up to the total; the values are typed now, so this is next) and on documents that disagree, who may pass a checkpoint by role, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
