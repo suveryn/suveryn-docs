@@ -212,6 +212,22 @@ Writes the confirmed facts into the case as a document, named after the playbook
 |---|---|
 | `template` | Only `summary` today: a heading, one line per fact with its sources. Documents from the office's own templates are a later format. |
 
+### `check`: what the notary would add up
+
+The server computes one comparison on the values as they stand and shows the result at the checkpoint and in the summary. A failed check is a point for the notary, never a block; the model never does arithmetic.
+
+| Key | What it is |
+|---|---|
+| `rule` | One comparison: `sum(founders.shares) == shares`, `certified_amount == contribution`, `count(founders) >= 1`, `plan_date <= deed_date`. A side is a fact, the sum of a list's field, the count of a list's entries, or a number; both sides are of one kind (amount, number or date). Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`. Nothing else: no arithmetic, no and/or, no text. |
+
+```yaml
+  - id: shares_add_up
+    kind: check
+    rule: sum(founders.shares) == shares
+```
+
+A result **holds**, **fails** (both sides as computed, so the notary sees 1050 against 1000) or is **open** when a value it needs is missing or gives no amount, number or date as written; it is recomputed whenever a value changes. A check comes after the read or ask steps that supply its facts. Its sentence per language is in the words file (`checks.<step id>`: "The founders' shares add up to the shares issued"); the file refuses a check without one.
+
 ### `needs`
 
 Any step may name the steps that must be done first: `needs: [read, missing]`. Default: the step before it. The graph is checked when the file loads: every id once, every `needs` a real step, no circle, a checkpoint before any `produce`, an `ask` only about facts a `read` before it reads.
@@ -234,7 +250,7 @@ Beside the manifest, one JSON file per language in `text/` (`en.json`, `nl.json`
 }
 ```
 
-`labels` needs an entry for every fact and, for a list, for every field as `"<list id>.<field id>"` (`"founders.name": "Name"`); an entry's values are labelled from these: "Founder(s) 2 · Name". `questions` needs an entry for every `request` step and every `ask` step (a template with `{label}`, or one entry per fact as `"missing.price": "…"`; for a list, `"missing.founders"` is asked when the documents name no entries). The model never words a question: what people read is what you wrote.
+`labels` needs an entry for every fact and, for a list, for every field as `"<list id>.<field id>"` (`"founders.name": "Name"`); an entry's values are labelled from these: "Founder(s) 2 · Name". `checks` needs a sentence per `check` step, what holds when it holds. `questions` needs an entry for every `request` step and every `ask` step (a template with `{label}`, or one entry per fact as `"missing.price": "…"`; for a list, `"missing.founders"` is asked when the documents name no entries). The model never words a question: what people read is what you wrote.
 
 ## What happens when it runs
 
@@ -254,4 +270,4 @@ Editors that understand JSON Schema (VS Code with the YAML extension, among othe
 
 ## What is not in the format yet
 
-Decisions and conditions (`when`), checks on sums (the founders' contributions adding up to the total; the values are typed now, so this is next) and on documents that disagree, who may pass a checkpoint by role, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
+Decisions and conditions (`when`), checks on documents that disagree, who may pass a checkpoint by role, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
