@@ -216,7 +216,7 @@ The run waits. A person sees every fact beside the passage it was read from, wit
 
 | Key | What it is |
 |---|---|
-| `by` | Who may pass it. Only `anyone_in_case` today (anyone who contributes to the case). |
+| `by` | Who may pass it: `anyone_in_case` (anyone who contributes to the case), or `manager` (the case's manager only; in a notarial office the notary, while a clerk prepares and corrects). The case's roles, no other. |
 
 A routine must have a checkpoint, after a `read` or `ask` step and before any `produce`.
 
@@ -286,4 +286,4 @@ Editors that understand JSON Schema (VS Code with the YAML extension, among othe
 
 ## What is not in the format yet
 
-Checks on documents that disagree, conditions on anything but a choice, who may pass a checkpoint by role, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
+Checks on documents that disagree, conditions on anything but a choice, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
