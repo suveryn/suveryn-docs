@@ -76,8 +76,9 @@ A fact is one thing the playbook needs to know. Each has:
 |---|---|---|
 | `id` | yes | Lower-case letters, digits and underscores, starting with a letter (`agreement_date`). Stable: labels, questions and the run's record key on it. |
 | `ask` | yes | What the fact is, in the words the model gets, in English. Be concrete: "the date by which the notarial deed must be signed", not "deadline". |
-| `kind` | no | `text` (default), `amount`, `date`, `number`, or `list`. Decides which checks apply to the value the model reads; `list` says the fact has several entries (below). |
+| `kind` | no | `text` (default), `amount`, `date`, `number`, `choice` or `list`. Decides which checks apply to the value the model reads; `choice` says the value is one of a few options; `list` says the fact has several entries (below). |
 | `of` | list only | What one entry is: a list of fields (each with `id`, `ask` and a plain `kind`), or one plain kind (`text`, `amount`, `date`, `number`) when each entry is a single value. |
+| `options` | choice only | The option ids, two to twelve (`[cash, in_kind, mixed]`). Each has its words in the labels (`"contribution_kind.cash": "In cash"`). |
 
 Every fact gets a label in each language in the words file (below); a list's fields too.
 
@@ -111,6 +112,21 @@ A list holds records of plain values, or plain values, never lists: a deed has s
 `number` is a figure without currency: a count, a share, a percentage. It is checked by meaning against the cited passage like an amount, short figures included ("3 aandelen"), which the chat's own figure check leaves alone as too ambiguous; in a playbook you asked for a count, so it is checked.
 
 People add entries. At a checkpoint, a list the documents named nothing of shows *Add* instead of *Fill in*, with one field per value of the entry; a list with entries offers one more under *More*. In words, "a third founder, Anna Peeters, 400 shares" adds one. Removing an entry is clearing its values.
+
+### Choices, and steps that depend on them
+
+A `choice` is a fact whose value is one of a few options:
+
+```yaml
+  - id: contribution_kind
+    ask: "how the founders contribute: cash, in_kind or mixed"
+    kind: choice
+    options: [cash, in_kind, mixed]
+```
+
+The model reads it when the documents say it (it can only answer with an option); otherwise an `ask` step asks, and the thread offers the options as buttons. An answer in words ("in natura") is mapped to the option by its words in the run's language.
+
+Any step may carry `when`, one condition on one choice: `when: contribution_kind != in_kind` or `when: contribution_kind == cash`. When the step is reached and the condition doesn't hold, or the choice isn't known by then, the step is skipped and the playbook says why in the thread, naming the step with its words from the words file (`steps.<step id>`): "Bank certificate: not needed, Contribution is In kind." A skipped `read` makes no facts, so nothing asks about them later; a skipped `check` has no result. The choice a `when` turns on must be read or asked by a step before it. No and/or, no conditions on other kinds of fact: the day a routine needs more, it needs a decision, not a longer line.
 
 ### What a fact does
 
@@ -250,7 +266,7 @@ Beside the manifest, one JSON file per language in `text/` (`en.json`, `nl.json`
 }
 ```
 
-`labels` needs an entry for every fact and, for a list, for every field as `"<list id>.<field id>"` (`"founders.name": "Name"`); an entry's values are labelled from these: "Founder(s) 2 · Name". `checks` needs a sentence per `check` step, what holds when it holds. `questions` needs an entry for every `request` step and every `ask` step (a template with `{label}`, or one entry per fact as `"missing.price": "…"`; for a list, `"missing.founders"` is asked when the documents name no entries). The model never words a question: what people read is what you wrote.
+`labels` needs an entry for every fact and, for a list, for every field as `"<list id>.<field id>"` (`"founders.name": "Name"`); an entry's values are labelled from these: "Founder(s) 2 · Name". A choice's options have theirs as `"<fact id>.<option>"`. `checks` needs a sentence per `check` step, what holds when it holds. `steps` names steps for the line that says one was skipped (`"bank": "Bank certificate"`); a step without a name is called by its id. `questions` needs an entry for every `request` step and every `ask` step (a template with `{label}`, or one entry per fact as `"missing.price": "…"`; for a list, `"missing.founders"` is asked when the documents name no entries). The model never words a question: what people read is what you wrote.
 
 ## What happens when it runs
 
@@ -270,4 +286,4 @@ Editors that understand JSON Schema (VS Code with the YAML extension, among othe
 
 ## What is not in the format yet
 
-Decisions and conditions (`when`), checks on documents that disagree, who may pass a checkpoint by role, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
+Checks on documents that disagree, conditions on anything but a choice, who may pass a checkpoint by role, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
