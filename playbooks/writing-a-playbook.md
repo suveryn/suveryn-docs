@@ -191,7 +191,7 @@ Beside the manifest, one JSON file per language in `text/` (`en.json`, `nl.json`
 
 ## What happens when it runs
 
-A run is a conversation with the routine. The playbook asks; people answer, in the case, in the run's language. The case shows that a playbook is running and what it waits for. A run can be paused and resumed by anyone who contributes to the case; stopped (what was confirmed stays, what was only read is dropped) or cancelled (nothing the run established counts any more, confirmed or not, and its result is marked withdrawn) by whoever started it or the case manager. Every fact keeps every version it had — as read, as answered, as confirmed, by whom — and nothing is rewritten. One run of a playbook at a time per case.
+A run is a conversation with the routine. The playbook asks; people answer, in the case, in the run's language. The case shows that a playbook is running and what it waits for. A run can be paused and resumed by anyone who contributes to the case; stopped (what was confirmed stays, what was only read is dropped) or cancelled (nothing the run established counts any more, confirmed or not, and its result is marked withdrawn) by whoever started it or the case manager. Every fact keeps every version it had (as read, as answered, as confirmed, and by whom), and nothing is rewritten. One run of a playbook at a time per case.
 
 ## Checking a file
 

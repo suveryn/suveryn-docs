@@ -108,7 +108,7 @@ In the old setup, Docling calls Tesseract itself, one page at a time. In `ocr_fa
 | Synthetic deed, 4 pages, 200 dpi scan | 11.7 s | 2.8 s | 2.7 s |
 | Synthetic deed, 40 pages, 200 dpi scan | 116.8 s | 14.0 s | 10.6 s |
 | Real report, 38 pages, 300 dpi scan with tables | 90.2 s | 24.7 s | 19.8 s |
-| Born-digital deed, 60 pages (no OCR needed) | — | 5.0 s | — |
+| Born-digital deed, 60 pages (no OCR needed) | n/a | 5.0 s | n/a |
 
 - **Scans:** 0.35–0.65 s per page with ocr_fast on 8 cores. **Born-digital PDFs:** about 0.08 s per page. Deeds the notary drafts in-house mostly fall in the second group.
 - **Accuracy:** on the synthetic deed, the word error rate went from 0.5% to 1.5%. Key facts found were the same (8 of 10). On the real report, all 16 checked figures were present, and ocr_fast picked up about 3× more table text.
@@ -122,7 +122,7 @@ In the old setup, Docling calls Tesseract itself, one page at a time. In `ocr_fa
 | Mistral 7B Instruct v0.3, Q5_K_M | 5 GB | 8,500–10,700 tok/s | 103–148 tok/s | **Rejected:** made up facts and missed the parties |
 | Mistral Small 3.2 24B, Q4_K_M | 14.3 GB | 2,500–3,900 tok/s | 49–59 tok/s | **Use:** correct on every deed question; says when something is missing |
 | Qwen3.8-27B, UD-Q4_K_M (thinking off) | 16.5 GB | 2,100–2,500 tok/s | 49 tok/s | **Recommended:** more complete summaries and fewer legal errors; made up a computed figure once |
-| Mistral Small 4, 119B | does not fit | — | — | Too large for 24–48 GB |
+| Mistral Small 4, 119B | does not fit | n/a | n/a | Too large for 24–48 GB |
 
 Prompt reading slows as the prompt gets longer: about 3,800 tok/s at 2k tokens and about 2,500 tok/s at 62k tokens for Mistral. Answer writing slows the same way.
 
@@ -138,7 +138,7 @@ These requests used the real report on Mistral Small 3.2 24B, with a 48k shared 
 | 4 questions at once | 1.4–2.9 s | 5.5–7.8 s | Fine |
 | 1 whole-document summary | 10.2 s | 24.5 s | Fine |
 | 1 summary + 3 questions | up to 12.9 s | questions about 20 s | Slow |
-| 2 summaries at once | — | failed | Out of context |
+| 2 summaries at once | n/a | failed | Out of context |
 | 2 people asking questions during OCR of a new document | 1.4–3.5 s | 4.9–7.9 s | Fine |
 
 While a summary is running, everyone else's questions are 4–5× slower. That is why summaries should run at upload, in a queue.
