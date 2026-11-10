@@ -12,7 +12,7 @@ The official deed-intake playbook, as shipped (comments shortened):
 manifest: 3
 id: playbook/be-notary/deed-intake
 pack: pack/be-notary
-version: "1.3"
+version: "1.5"
 name: Deed intake
 case_types: [sale]
 
@@ -43,10 +43,23 @@ instructions: >-
 steps:
   - id: agreement
     kind: request
+    expects: sale_agreement
     min: 1
-  - id: read
+  - id: title_deed
+    kind: request
+    expects: title_deed
+    min: 1
+    allow_none: true
+  # … the certificates, the same way
+  - id: agreement_read
     kind: read
-    facts: all
+    documents: [sale_agreement]
+    facts: [sellers, buyers, property, cadastral, price, deposit, agreement_date, deed_deadline, conditions, occupancy]
+  - id: title_read
+    kind: read
+    documents: [sale_agreement, title_deed]
+    facts: [title]
+  # … the certificates' read
   - id: missing
     kind: ask
     facts: all
@@ -179,12 +192,12 @@ Every step has an `id` (lower case, digits, hyphens or underscores) and a `kind`
 
 ### `request`: ask for documents
 
-The playbook puts a question in the thread and waits until the case has the documents. If the case already has them when the step comes up, the step is done at once and no question is asked.
+The playbook puts a question in the thread and waits for a person's answer: the documents, attached to it; *Use the documents already in the case*; or, where the step allows it, *There is none*. It asks even when the case already holds documents, so a deed already in the case is never read as the agreement without a word.
 
 | Key | What it is |
 |---|---|
 | `min` | How many uploaded documents the case needs before the step is done. Default 1. |
-| `allow_none` | `true` lets a person answer that there is no such document; the step is then skipped. Default `false`. |
+| `allow_none` | `true` lets a person answer that there is no such document (*There is none*); the step is then done without one. Default `false`. |
 | `expects` | A name for what is asked (`bank_certificate`), unique among the routine's requests, so a `read` can be aimed at it. When a person answers a named request, the documents that came with the answer are recorded as its; with none attached, the case's uploaded documents no other request has yet. |
 
 The question's words come from the words file (`questions.<step id>`). After uploading, a person presses continue; sūveryn counts the case's uploaded documents.
@@ -197,6 +210,8 @@ The model reads the case's uploaded documents for the facts named and cites the 
 |---|---|
 | `facts` | Which facts to read: a list of ids, or `all`. Required. A fact is read by one `read` step; the loader refuses a second. |
 | `documents` | The names (`expects`) of the requests whose documents this read reads: `[bank_certificate]`. Without it the read is over every document in the case. Aimed only at requests a person said have no document, the read makes no model call: its facts are not established, and an `ask` step can ask about them. |
+
+**Aim each read at the documents that state its facts.** A read over every document in the case is the easy way and the risky one: an earlier deed in the file names other parties and another price, and in a long file it can fill the reading. Documents longer than one reading takes (about twenty pages together) are read by the passages that best match the read's facts; the facts still not found are then looked for in each document alone, in the order `documents` names them, and a fact found is never replaced by a later document. Put today's document first. The thread says when a document was read in part.
 
 Keep one `read` to about fifteen facts (a list counts as one); a routine with more needs several, each aimed at its own documents:
 
