@@ -164,6 +164,14 @@ A fact is the unit everything else works on. Over a run it goes through states, 
 
 Where a fact shows: in the thread, when the playbook asks about it; at the checkpoint, beside its passage, with the check's warning; in the panel next to the thread, with its state; in the summary, as one line with its sources. When a document a fact was read from is later deleted, the run is marked out of date, but the fact and its passage stay.
 
+**A number with check digits.** A text fact or a list's text field that holds a Belgian national register number, an enterprise number or an IBAN can say so: `format: national_register`, `enterprise`, `person_or_company` (a party that is a person or a company) or `iban`. sūveryn then checks the number's own check digits by arithmetic; one that can't be right, a typo or a misread scan, is flagged for the person at the checkpoint. Nothing is blocked, and no model is involved.
+
+```yaml
+  - id: register
+    ask: the seller's national register number (a company's enterprise number), as written
+    format: person_or_company
+```
+
 Writing a good `ask`: name the thing exactly as a careful clerk would ("the date by which the notarial deed must be signed"), say what form you want ("full names as written"), and keep one fact per line of the deed. If a value can't be checked by a person at a glance, split it into two facts.
 
 ### The deed-intake facts, as an example
