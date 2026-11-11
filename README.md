@@ -15,7 +15,7 @@ Related repositories:
 
 - [Data lifecycle](administration/data-lifecycle.md): what sūveryn keeps, for how long, and what deleting guarantees. The policy every claim about deletion follows.
 - [Writing a playbook](playbooks/writing-a-playbook.md): the manifest file, step by step, for offices and partners that write their own routines. Kept in step with every release that changes the format.
-- [Benchmarks](benchmarks/): hardware and pipeline measurements for development pods and on-prem appliances.
+- [Benchmarks](benchmarks/): hardware and pipeline measurements for development pods and on-prem appliances, and how well the answer checks catch mistakes.
 
 ## Licence
 
