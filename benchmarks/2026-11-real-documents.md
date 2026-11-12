@@ -11,11 +11,11 @@ repositories.
 
 | | |
 |---|---|
-| Date | 11 November 2026 |
+| Date | 11 November 2026; a second round on a 24 GB card on 12 November |
 | Code | [suveryn-core](https://github.com/suveryn/suveryn-core), the answers test of `scripts/gpu-round.sh` |
 | Model | Qwen3.8-27B (Q4_K_M), llama.cpp b12111; Mistral Small 3.2 24B for comparison |
-| GPU | one card with 32 GB; once more with 8 GB of it held back, as a 24 GB card |
-| Documents | 10 documents, 3 to 98 pages, 299 pages in all, 145 of them scans |
+| GPU | 11 November: one card with 32 GB, once more with 8 GB of it held back. 12 November: an RTX 4090, 24 GB |
+| Documents | 11 documents: ten PDFs of 3 to 98 pages (299 pages in all, 145 of them scans) and one Word file |
 | Questions | 106, in 23 sets, mostly in Dutch, on Dutch, French and English documents |
 
 What the results led to is in core's design note,
@@ -33,7 +33,8 @@ What the results led to is in core's design note,
   real answers, most of them wrongly. It is not in the product.
 - Marking a source sentence by its meaning, for a Dutch answer on a French or English source, found the right
   sentence in every case read. It is on.
-- The product fits a 24 GB card with about 1 GB to spare.
+- The product fits a 24 GB card: run on one the next day, it used 24.0 of 24.5 GB, with no memory error.
+- Mistral Small, with its working memory halved, fits the card too and passes three answers fewer than Qwen.
 
 ## Reading the documents
 
@@ -51,7 +52,7 @@ What the results led to is in core's design note,
 | 10 | 3 | 3 | 5 |
 
 A page of digital text takes 0.1 to 0.4 seconds, a scanned page 0.4 to 1.6. Every document was read without an
-error. For 44 of the 106 questions the documents were longer than the model reads at once, and the answer was
+error; the Word file, which has no pages to count, took under a second. For 44 of the 106 questions the documents were longer than the model reads at once, and the answer was
 made from the passages that match the question best.
 
 ## The answers
@@ -142,11 +143,54 @@ meaning and asks the reader to check it. It checks nothing itself; a wrong mark 
 
 Qwen stays the default.
 
-## A 24 GB card
+## A 24 GB card, first with memory held back
 
 With 8 GB of the card held back, leaving 24.6 GB, the round ran to the end and gave the same 106 answers word for
 word. The product used 23.4 GB at its highest: it fits, with about 1 GB to spare and no room for anything else on
 the card.
+
+The round on a real 24 GB card followed the next day, below.
+
+## The next day, on a 24 GB card
+
+On 12 November the same documents and questions were run on an RTX 4090 (24 564 MiB), with core as it stood that
+day: the fixes above merged, marking by meaning on. The machine had 31 GB of system memory.
+
+| | Qwen3.8-27B | Mistral Small 3.2, as listed | Mistral, working memory halved |
+|---|---|---|---|
+| Answers that pass | 88 of 106 | 85 of 106 | 85 of 106 |
+| Items the checks report | 63 | 108 | 118 |
+| Sums made by the server | 7 of 8 | 6 of 8 | 6 of 8 |
+| Seconds per answer | 11.6 | 8.8 | 8.7 |
+| GPU memory at its highest | 24.0 GB | 24.1 GB | 22.4 GB |
+| The reader out of GPU memory | never | 63 times | never |
+| The longest document read in | 56 s | 163 s | 61 s |
+
+- **Qwen fits a real 24 GB card**, with about half a gigabyte to spare. Nothing ran out of memory.
+- **Mistral as listed does not fit it**: the model leaves the document reader too little, the reader runs out of
+  GPU memory, recovers, and reads up to four times slower. With the model's working memory halved (`-c 32768`)
+  it fits, reads at normal speed, and answers as before. What half the working memory costs with several people
+  at once was not measured.
+- **Mistral did much better than the day before** (76 of 106, 216 items), on newer code. Why was not examined.
+- Running Mistral with its own chat template changed nothing: the same results, answer for answer.
+
+**One more sentence in the prompt.** Most of what the checks report comes from answers that list many parties or
+amounts and cite the same one or two passages for all of them. A sentence asking to cite, for each item of a list
+or a table, the passage that names that item was tried on both models:
+
+| | Qwen | Qwen, with the sentence | Mistral | Mistral, with the sentence |
+|---|---|---|---|---|
+| Items the checks report | 63 | 45 | 118 | 99 |
+| The answer with the most items | 25 | 10 | 42 | 21 |
+| Answers that pass | 88 | 86 | 85 | 83 |
+
+It thins out the worst answers and does not change how many answers pass: the difference of two is the noise
+between identical rounds. It is not in the product.
+
+**System memory.** The model server is started with a 32 GB prompt cache in system memory, which the hardware
+benchmark specifies for an office machine with 64 GB. On this machine, with 31 GB, the system stopped the server
+in the middle of every round until the cache was set to 8 GB. A machine must have well more memory than the
+cache it is given.
 
 ## What this does not show
 
@@ -158,7 +202,7 @@ the card.
   a direction, too few to quote as a rate.
 - One person at a time. Several people at once are measured in the
   [hardware benchmark](2026-10-hardware-benchmark.md).
-- The 24 GB card was a larger card with memory held back, not a 24 GB card.
+- The round on the 24 GB card was one person at a time, on a machine with less system memory than an office's.
 
 ## Run it again
 
