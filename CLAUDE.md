@@ -20,7 +20,7 @@ For what sūveryn is and what is decided, start with the private [suveryn-handbo
 - **The data lifecycle page governs every claim about deletion**, in the product, these docs and sales material. No claim of secure, permanent or cryptographic erasure anywhere; what is not covered is named.
 - **Writing a playbook is kept in step with every core release that changes the manifest format**, in the same PR series. Its examples pass core's lint.
 - **Written for someone who doesn't know the code**: an office, a partner, a reviewer. Short and plain: what it does and why. **Copy** follows the brand's [Wording and spelling](https://github.com/suveryn/suveryn-brand/blob/main/guidelines/brand-guidelines.md#wording-and-spelling). Markdown passes `markdownlint-cli2` and the link check (CI). Links to private repositories (the handbook) are listed in `.markdown-link-check.json` `ignorePatterns`, since a private repository answers 404 to the checker.
-- **Measurements of the product are in [`benchmarks/`](benchmarks/)**, one dated report each with its line in the README there: what was measured, on what, what it doesn't show, and how to run it again. Fictional text only. The tests that produce them live in the code repositories.
+- **Measurements of the product are in [`benchmarks/`](benchmarks/)**, one dated report each with its line in the README there: what was measured, on what, what it doesn't show, and how to run it again. Fictional text only; a round on real documents is reported in counts, with no document, party or sentence named. The tests that produce them live in the code repositories.
 - **The manifesto changes only with the founder**, word by word.
 
 ## Verify

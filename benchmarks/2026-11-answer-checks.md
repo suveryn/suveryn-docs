@@ -16,6 +16,10 @@ What the results led to is in core's design note,
 checks stay rules, the number words are generated, and the model's second reading is a proposal that real deeds
 will decide. It is not in the product.
 
+**Since then:** the same checks were put to real documents the next day. The rules do report things on real
+answers, and the model's second reading flags far too much there: see
+[A round on real documents](2026-11-real-documents.md).
+
 ## In short
 
 - Rules are exact for what can be compared: amounts, dates, names, percentages, the source cited. They catch all
