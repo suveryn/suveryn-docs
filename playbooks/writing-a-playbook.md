@@ -1,6 +1,6 @@
 # Writing a playbook
 
-A playbook is a routine sūveryn follows in a case: it asks for documents, reads them, asks about what it couldn't find, waits for a person to confirm every fact, and writes a result. You write a playbook as one YAML file, the **manifest**, plus its words in each language. This page is the reference for that file. It describes **manifest format 3** as sūveryn reads it today (format 2 plus lists and numbers; a format-2 file loads unchanged) and is kept up to date with every release that changes the format; the machine-readable version is the JSON Schema in [`suveryn-core/packages/playbooks/schema/`](https://github.com/suveryn/suveryn-core/tree/main/packages/playbooks/schema), which editors use for completion and checking.
+A playbook is a routine sūveryn follows in a case: it asks for documents, reads them, asks about what it couldn't find, waits for a person to confirm every fact, and writes a result. You write a playbook as one YAML file, the **manifest**, plus its words in each language. This page is the reference for that file. It describes **manifest format 3** as sūveryn reads it today (no other format loads) and is kept up to date with every release that changes the format; the machine-readable version is the JSON Schema in [`suveryn-core/packages/playbooks/schema/`](https://github.com/suveryn/suveryn-core/tree/main/packages/playbooks/schema), which editors use for completion and checking.
 
 Three rules shape everything below. The playbook decides the order of steps; the model only reads documents inside a `read` step and never chooses what comes next. A fact is never confirmed by the model: only a person does that, at a checkpoint. And the model answers in the shape the facts describe, no other: sūveryn derives that shape from the manifest and the model server holds the model to it, so a value is never taken by position or guessed from a stray line.
 
@@ -81,7 +81,7 @@ Read it top to bottom: who the playbook is (`id`, `pack`, `version`), where it f
 
 | Key | Required | What it is |
 |---|---|---|
-| `manifest` | yes | The format version: `2` or `3`. Write `3`. Format 3 adds the kinds `number` and `list`; a format-2 file loads as it is, and a format-2 file that uses either kind is refused with the fact named. |
+| `manifest` | yes | The format version: `3`. A file with another version is refused. |
 | `id` | yes | `playbook/<pack>/<name>`, lower case, digits and hyphens. Never changes once published: it ends up in every run's record, in every result document, and in the licence. |
 | `pack` | yes | `pack/<profession-jurisdiction>`, for example `pack/be-notary`. The `id` must start with `playbook/<that pack>/`. |
 | `version` | yes | `major.minor`, in quotes (`"1.1"`). A change that changes results is a new minor version; a change that makes an old run unreadable is a new major one. Every run records the version it ran under. |
@@ -89,7 +89,7 @@ Read it top to bottom: who the playbook is (`id`, `pack`, `version`), where it f
 | `case_types` | yes | The case types the playbook fits, one or more: `sale`, `company-formation`, `estate`, `gift`, `marriage-contract` for notaries. It shows only in cases of those types. |
 | `facts` | yes | What the playbook wants to know; see below. At most 100. |
 | `instructions` | yes | What the model is told before it reads the documents, in English, up to 4 000 characters. Do **not** describe the answer's shape: sūveryn derives it from the facts and appends it. |
-| `steps` | format 2 | The routine; see below. At most 50. |
+| `steps` | yes | The routine; see below. At most 50. |
 
 Any key not listed here is an error. sūveryn refuses a file it doesn't fully understand rather than guess: every error names the file, the step or the field, and what is wrong.
 
@@ -109,7 +109,7 @@ Every fact gets a label in each language in the words file (below); a list's fie
 
 ### Lists and numbers
 
-A deed's parties don't fit one line. Format 3 lets a fact hold several entries:
+A deed's parties don't fit one line. A fact can hold several entries:
 
 ```yaml
   - id: founders
@@ -324,4 +324,4 @@ Editors that understand JSON Schema (VS Code with the YAML extension, among othe
 
 ## What is not in the format yet
 
-Checks on documents that disagree, conditions on anything but a choice, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in later formats; a format-2 or format-3 file keeps loading as it is.
+Checks on documents that disagree, conditions on anything but a choice, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in a later format.
