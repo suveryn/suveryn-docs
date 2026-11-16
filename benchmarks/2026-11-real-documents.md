@@ -241,7 +241,7 @@ longest documents, so every question fills the reading budget. Mistral only; the
 
 - These are mostly company contracts, with a few notarial deeds, from one owner. A round on notarial deeds in
   French and Dutch is still to come.
-- Ten documents and 106 questions are few, and the questions were written knowing the documents.
+- Eleven documents and 106 questions are few, and the questions were written knowing the documents.
 - Whether each reported item is a real problem for a reader was not judged one by one, only where the item is.
 - The second reading and the marking by meaning rest on samples of 12 and 16 read by one person: enough to choose
   a direction, too few to quote as a rate.
