@@ -28,3 +28,18 @@ jobs:
           npm install --no-save markdown-link-check
           find . -name "*.md" -not -path "./node_modules/*" -print0 \
             | xargs -0 -n1 npx markdown-link-check --config .markdown-link-check.json
+
+  playbook-example:
+    name: The playbook page's example is the shipped one
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: suveryn-core, for its deed intake
+        uses: actions/checkout@v4
+        with:
+          repository: suveryn/suveryn-core
+          path: core
+
+      - name: The example in Writing a playbook is the deed intake core ships
+        run: python3 playbooks/check_example.py core
