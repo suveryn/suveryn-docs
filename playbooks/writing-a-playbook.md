@@ -6,13 +6,13 @@ Three rules shape everything below. The playbook decides the order of steps; the
 
 ## A complete example
 
-The official deed-intake playbook, as shipped (comments shortened):
+The official deed-intake playbook, [as shipped](https://github.com/suveryn/suveryn-core/blob/main/packages/playbooks/src/suveryn_playbooks/be_notary/deed-intake.yaml), without its opening comment:
 
 ```yaml
 manifest: 3
 id: playbook/be-notary/deed-intake
 pack: pack/be-notary
-version: "1.5"
+version: "1.7"
 name: Deed intake
 case_types: [sale]
 
@@ -27,46 +27,106 @@ facts:
         ask: the seller's address as written
       - id: register
         ask: the seller's national register number (a company's enterprise number), as written
+        format: person_or_company
+  - id: buyers
+    ask: the buying party or parties, one entry per buyer
+    kind: list
+    of:
+      - id: name
+        ask: the buyer's full name as written (a company's name as written)
+      - id: address
+        ask: the buyer's address as written
+      - id: register
+        ask: the buyer's national register number (a company's enterprise number), as written
+        format: person_or_company
+  - id: property
+    ask: "the property sold: its address and description"
+  - id: cadastral
+    ask: "the cadastral identification of the property: municipality, division, section, number"
   - id: price
     ask: the sale price
     kind: amount
+  - id: deposit
+    ask: the advance or guarantee paid at signing, and to whom it was paid
+    kind: amount
+    share_of: price
   - id: agreement_date
     ask: the date the private agreement was signed
     kind: date
-  # … eleven more
+  - id: deed_deadline
+    ask: the date by which the notarial deed must be signed
+    kind: date
+    counts_from: agreement_date
+  - id: conditions
+    ask: the suspensive conditions (financing, permits, other), one entry per condition
+    kind: list
+    of:
+      - id: condition
+        ask: the condition as written
+      - id: term
+        ask: the date by which the condition must be met, as the agreement writes it
+        kind: date
+        counts_from: agreement_date
+  - id: title
+    ask: "the seller's title: the earlier deed, its date and the notary who passed it"
+  - id: epc
+    ask: "the energy performance certificate: its reference and result"
+  - id: soil
+    ask: "the soil certificate: its reference and conclusion"
+  - id: occupancy
+    ask: "the occupancy at delivery: free, let or occupied, and by whom"
 
 instructions: >-
   You are preparing the intake of a sale for a notarial deed. Read the excerpts and give every fact
-  below as the documents write it … A fact the excerpts do not contain is null: never guess …
-  Answer in the language of the documents.
+  below as the documents write it (names, amounts, dates, references), with the numbers of the
+  excerpts the value comes from. A fact the excerpts do not contain is null: never guess, never fill
+  in from general knowledge. Answer in the language of the documents.
 
 steps:
-  - id: agreement
+  - id: agreement          # the signed sale agreement: the parties, the property, the price, the dates
     kind: request
     expects: sale_agreement
     min: 1
-  - id: title_deed
+  - id: title_deed         # the seller's title: the earlier deed by which the seller acquired the property
     kind: request
     expects: title_deed
     min: 1
     allow_none: true
-  # … the certificates, the same way
-  - id: agreement_read
+  - id: certificates       # the energy performance certificate, the soil certificate
+    kind: request
+    expects: certificates
+    min: 1
+    allow_none: true
+  - id: agreement_read     # today's sale, from today's agreement only: an earlier deed names other parties
     kind: read
     documents: [sale_agreement]
     facts: [sellers, buyers, property, cadastral, price, deposit, agreement_date, deed_deadline, conditions, occupancy]
-  - id: title_read
+  - id: title_read         # the seller's title: the agreement says where it comes from, the title deed in full
     kind: read
     documents: [sale_agreement, title_deed]
     facts: [title]
-  # … the certificates' read
-  - id: missing
+  - id: certificates_read  # the certificates, or the agreement's lines about them
+    kind: read
+    documents: [certificates, sale_agreement]
+    facts: [epc, soil]
+  - id: missing            # one question per fact the documents did not contain
     kind: ask
     facts: all
+  - id: a_seller
+    kind: check
+    rule: "count(sellers) >= 1"
+  - id: a_buyer
+    kind: check
+    rule: "count(buyers) >= 1"
   - id: deposit_within_price
     kind: check
     rule: deposit <= price
-  # … four more checks
+  - id: deed_after_agreement
+    kind: check
+    rule: agreement_date < deed_deadline
+  - id: conditions_before_deed
+    kind: check
+    rule: latest(conditions.term) <= deed_deadline
   - id: confirm
     kind: checkpoint
     by: anyone_in_case
@@ -104,6 +164,9 @@ A fact is one thing the playbook needs to know. Each has:
 | `kind` | no | `text` (default), `amount`, `date`, `number`, `choice` or `list`. Decides which checks apply to the value the model reads; `choice` says the value is one of a few options; `list` says the fact has several entries (below). |
 | `of` | list only | What one entry is: a list of fields (each with `id`, `ask` and a plain `kind`), or one plain kind (`text`, `amount`, `date`, `number`) when each entry is a single value. |
 | `options` | choice only | The option ids, two to twelve (`[cash, in_kind, mixed]`). Each has its words in the labels (`"contribution_kind.cash": "In cash"`). |
+| `format` | text only | A number with check digits (below). |
+| `counts_from` | date only | The date fact a term counts from (below). |
+| `share_of` | amount only | The amount fact a percentage is a share of (below). |
 
 Every fact gets a label in each language in the words file (below); a list's fields too.
 
@@ -164,13 +227,9 @@ A fact is the unit everything else works on. Over a run it goes through states, 
 
 Where a fact shows: in the thread, when the playbook asks about it; at the checkpoint, beside its passage, with the check's warning; in the panel next to the thread, with its state; in the summary, as one line with its sources. When a document a fact was read from is later deleted, the run is marked out of date, but the fact and its passage stay.
 
-**A number with check digits.** A text fact or a list's text field that holds a Belgian national register number, an enterprise number or an IBAN can say so: `format: national_register`, `enterprise`, `person_or_company` (a party that is a person or a company) or `iban`. sūveryn then checks the number's own check digits by arithmetic; one that can't be right, a typo or a misread scan, is flagged for the person at the checkpoint. Nothing is blocked, and no model is involved.
+**A number with check digits.** A text fact or a list's text field that holds a Belgian national register number, an enterprise number or an IBAN can say so: `format: national_register`, `enterprise`, `person_or_company` (a party that is a person or a company) or `iban`. sūveryn then checks the number's own check digits by arithmetic; one that can't be right, a typo or a misread scan, is flagged for the person at the checkpoint. Nothing is blocked, and no model is involved. In the example above, a party's `register` is one.
 
-```yaml
-  - id: register
-    ask: the seller's national register number (a company's enterprise number), as written
-    format: person_or_company
-```
+**A date written as a term, an amount written as a share.** An agreement often writes "within four months of signing" or "ten per cent of the price". A date fact, or a list's date field, can name the date such a term counts from; an amount fact, or a list's amount field, can name the amount such a percentage is a share of. Both name a fact outside a list that isn't itself counted from, or a share of, another. sūveryn then works the value out by arithmetic and flags it for the person at the checkpoint, with how it was worked out. A term in working days is counted only when the pack brings a calendar; otherwise it stays as written. In the example above, `deposit` is a share of `price`, and `deed_deadline` counts from `agreement_date`.
 
 Writing a good `ask`: name the thing exactly as a careful clerk would ("the date by which the notarial deed must be signed"), say what form you want ("full names as written"), and keep one fact per line of the deed. If a value can't be checked by a person at a glance, split it into two facts.
 
@@ -178,14 +237,14 @@ Writing a good `ask`: name the thing exactly as a careful clerk would ("the date
 
 | Fact | Kind | Why it is there |
 |---|---|---|
-| `sellers`, `buyers` | text | The parties, as the agreement names them; the deed must match the agreement exactly |
+| `sellers`, `buyers` | list | The parties, one entry each, as the agreement names them; the deed must match the agreement exactly |
 | `property` | text | Address and description, for the deed's description of the good |
 | `cadastral` | text | Municipality, division, section, number; often missing from the agreement, hence usually asked |
 | `price` | amount | The check compares it with the cited passage |
 | `deposit` | amount | What was paid at signing and to whom, for the settlement |
 | `agreement_date` | date | Starts the deadlines |
 | `deed_deadline` | date | By when the deed must be passed |
-| `conditions` | text | Suspensive conditions with their terms, which decide whether the sale stands |
+| `conditions` | list | Suspensive conditions with their terms, which decide whether the sale stands |
 | `title` | text | The seller's earlier deed: its date and notary, for the chain of title |
 | `epc`, `soil` | text | The energy and soil certificates' references and conclusions, which the deed must cite |
 | `occupancy` | text | Free, let or occupied, and by whom, at delivery |
@@ -233,7 +292,9 @@ steps:
     kind: read
     documents: [bank_certificate]
     facts: [bank_certificate, certified_amount]
-``` A `read` step is one grounded model call whose answer must have the facts' shape; the model server enforces that shape, and an answer that still can't be read is asked for once more, then the run fails as "unreadable answer" and can be started again.
+```
+
+A `read` step is one grounded model call whose answer must have the facts' shape; the model server enforces that shape, and an answer that still can't be read is asked for once more, then the run fails as "unreadable answer" and can be started again.
 
 ### `ask`: ask people about what wasn't found
 
@@ -297,7 +358,7 @@ Beside the manifest, one JSON file per language in `text/` (`en.json`, `nl.json`
     "summary": "Reads the facts for the deed from the documents",
     "labels": { "sellers": "Seller(s)", "price": "Price", "agreement_date": "Agreement signed on" },
     "questions": {
-      "agreement": "Upload the signed sale agreement and what the parties sent. Then continue.",
+      "agreement": "Upload the signed sale agreement. Then continue.",
       "missing": "The documents don't mention {label}. What is it? Leave empty if you don't know yet."
     }
   }
@@ -317,7 +378,7 @@ The loader refuses a wrong file with the place and the reason, for example:
 ```text
 be_notary/mandate.yaml: 2 problem(s):
   steps: step 'summary' (produce): nothing is produced before a checkpoint; it needs one
-  facts.3.kind: Input should be 'text', 'amount' or 'date'
+  facts.3.kind: Input should be 'text', 'amount', 'date', 'number', 'choice' or 'list'
 ```
 
 Editors that understand JSON Schema (VS Code with the YAML extension, among others) check as you type when pointed at the schema file.
