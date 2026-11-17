@@ -145,8 +145,8 @@ Read it top to bottom: who the playbook is (`id`, `pack`, `version`), where it f
 | `id` | yes | `playbook/<pack>/<name>`, lower case, digits and hyphens. Never changes once published: it ends up in every run's record, in every result document, and in the licence. |
 | `pack` | yes | `pack/<profession-jurisdiction>`, for example `pack/be-notary`. The `id` must start with `playbook/<that pack>/`. |
 | `version` | yes | `major.minor`, in quotes (`"1.1"`). A change that changes results is a new minor version; a change that makes an old run unreadable is a new major one. Every run records the version it ran under. |
-| `name` | yes | The English name; it becomes the result document's file name ("Deed intake 2026/0417 (1.1).txt"). |
-| `case_types` | yes | The case types the playbook fits, one or more: `sale`, `company-formation`, `estate`, `gift`, `marriage-contract` for notaries. It shows only in cases of those types. |
+| `name` | yes | The English name. The result document is named by the words file's `title` in the run's language ("Deed intake 2026/0417 (1.1)"). |
+| `case_types` | yes | The case types the playbook fits, one or more: `sale`, `company-formation`, `estate`, `gift`, `marriage-contract`, `care-mandate` for notaries. It shows only in cases of those types. |
 | `facts` | yes | What the playbook wants to know; see below. At most 100. |
 | `instructions` | yes | What the model is told before it reads the documents, in English, up to 4 000 characters. Do **not** describe the answer's shape: sūveryn derives it from the facts and appends it. |
 | `steps` | yes | The routine; see below. At most 50. |
