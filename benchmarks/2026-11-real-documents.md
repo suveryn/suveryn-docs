@@ -11,10 +11,10 @@ repositories.
 
 | | |
 |---|---|
-| Date | 11 November 2026; a second round on a 24 GB card on 12 November; a third on 13 November |
+| Date | 11 November 2026; a second round on a 24 GB card on 12 November; a third on 13 November; a fourth, on Mistral within 24 GB, on 17 November |
 | Code | [suveryn-core](https://github.com/suveryn/suveryn-core), the answers test of `scripts/gpu-round.sh` |
-| Model | Qwen3.8-27B (Q4_K_M), llama.cpp b12111; Mistral Small 3.2 24B for comparison |
-| GPU | 11 November: one card with 32 GB, once more with 8 GB of it held back. 12 November: an RTX 4090, 24 GB. 13 November: an RTX 5090, 32 GB |
+| Model | Qwen3.8-27B (Q4_K_M), llama.cpp b12111; Mistral Small 3.2 24B for comparison (Q4_K_M; on 17 November also IQ4_XS) |
+| GPU | 11 November: one card with 32 GB, once more with 8 GB of it held back. 12 November: an RTX 4090, 24 GB. 13 November: an RTX 5090, 32 GB. 17 November: an L40S, 46 GB, held to 24 GB |
 | Documents | 11 documents: ten PDFs of 3 to 98 pages (299 pages in all, 145 of them scans) and one Word file |
 | Questions | 106, in 23 sets, mostly in Dutch, on Dutch, French and English documents |
 
@@ -34,8 +34,8 @@ What the results led to is in core's design note,
 - Marking a source sentence by its meaning, for a Dutch answer on a French or English source, found the right
   sentence in every case read. It is on.
 - The product fits a 24 GB card: run on one the next day, it used 24.0 of 24.5 GB, with no memory error.
-- Mistral Small fits the card only with its working memory halved, and then four people asking at once all get
-  an error. It stays a second model for a larger card.
+- Mistral Small as first listed doesn't fit a 24 GB card. With its smaller file and a 4-bit cache it does, serves
+  four people at once, and passes 83 of 106 (Qwen 93): it is listed that way now.
 - One more sentence in the prompt about citing was tried twice and dropped: it costs clean answers.
 
 ## Reading the documents
@@ -237,6 +237,39 @@ longest documents, so every question fills the reading budget. Mistral only; the
 - With eight people at once on long documents, half the questions fail with an error where they should wait
   their turn. Whether Qwen does the same was not measured.
 
+## A fourth round, 17 November: Mistral within 24 GB
+
+The same documents and questions, on core at `b7760b9` (17 November), on an L40S (46 068 MiB) where a process
+held all but 24 564 MiB, as much as an RTX 4090 has (suveryn-tracker#133). Four ways to run Mistral, all with the full working memory (`-c 65536`), and Qwen
+as the yardstick. The document reader and the model share the card.
+
+| | Qwen, as listed | Mistral, as listed | Mistral, 4-bit cache | Mistral, smaller file (IQ4_XS) | Smaller file, 4-bit cache |
+|---|---|---|---|---|---|
+| The round ran | yes | no: a document failed to read | yes | yes | yes |
+| Answers that pass | 93 of 106 | | 81 | 83 | 83 |
+| Items the checks report | 49 | | 176 | 148 | 103 |
+| Seconds per answer | 13.4 | | 10.7 | 9.5 | 9.4 |
+| GPU memory at its highest | 23.8 GB | 24.0 GB | 22.9 GB | 23.6 GB | 21.4 GB |
+
+Several people at the same moment on the longest documents, as on 13 November:
+
+| People asking at once | Qwen | Mistral, 4-bit cache | Smaller file | Smaller file, 4-bit cache |
+|---|---|---|---|---|
+| 1 | 2 of 2 | 2 of 2 | 2 of 2 | 2 of 2 |
+| 2 | 4 of 4 | 4 of 4 | 4 of 4 | 4 of 4 |
+| 4 | 8 of 8 | 8 of 8 | 8 of 8 | 8 of 8 |
+| 8 | 12 of 16 | 12 of 16 | 8 of 16 | 12 of 16 |
+
+- **Mistral as listed doesn't fit**: the reader ran out of GPU memory over and over, and one document failed to
+  read, which stops the round. On 12 November, on a real RTX 4090, the reader recovered each time; why not here
+  was not examined.
+- **Mistral fits 24 GB with its smaller file and a 4-bit cache**, with about 2.6 GB to spare, and serves four
+  people at once. Its 83 passes are within the noise of the other two settings; it reports the fewest items and
+  leaves the most memory. Core lists it that way now. Not tried: an 8-bit cache for keys and 4-bit for values.
+- **Qwen stays the default**: 93 pass against 83, and half the items reported.
+- **With eight people at once, Qwen fails some questions too**, with an error from the model server, so it is not
+  Mistral's alone. Those questions should wait their turn: suveryn-tracker#187.
+
 ## What this does not show
 
 - These are mostly company contracts, with a few notarial deeds, from one owner. A round on notarial deeds in
@@ -248,8 +281,9 @@ longest documents, so every question fills the reading budget. Mistral only; the
 - One person at a time. Several people at once are measured in the
   [hardware benchmark](2026-10-hardware-benchmark.md).
 - The rounds on the 106 questions were one person at a time. Several people at once on long documents was
-  measured for Mistral only, twice per number of people.
-- The round on the 24 GB card ran on a machine with less system memory than an office's.
+  measured twice per number of people.
+- The round on the 24 GB card ran on a machine with less system memory than an office's. The fourth round held a
+  larger card to 24 GB: its speeds are not those of an RTX 4090.
 
 ## Run it again
 
