@@ -278,8 +278,6 @@ Several people at the same moment on the longest documents, as on 13 November:
 - Whether each reported item is a real problem for a reader was not judged one by one, only where the item is.
 - The second reading and the marking by meaning rest on samples of 12 and 16 read by one person: enough to choose
   a direction, too few to quote as a rate.
-- One person at a time. Several people at once are measured in the
-  [hardware benchmark](2026-10-hardware-benchmark.md).
 - The rounds on the 106 questions were one person at a time. Several people at once on long documents was
   measured twice per number of people.
 - The round on the 24 GB card ran on a machine with less system memory than an office's. The fourth round held a

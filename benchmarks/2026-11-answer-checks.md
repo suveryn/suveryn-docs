@@ -7,8 +7,8 @@ reading the answer a second time. All test text is fictional.
 | | |
 |---|---|
 | Date | 10 and 11 November 2026 |
-| Code | [suveryn-core](https://github.com/suveryn/suveryn-core), `packages/harness/tests/` |
-| Model | the default model of core's `models/manifest.json`, llama.cpp, on a rented GPU machine |
+| Code | [suveryn-core](https://github.com/suveryn/suveryn-core), `packages/harness/tests/`; the commit it ran on is not recorded |
+| Model | Qwen3.8-27B (UD-Q4_K_M), llama.cpp, on a rented GPU machine |
 | Languages | Dutch, French, English |
 
 What the results led to is in core's design note,
@@ -16,8 +16,7 @@ What the results led to is in core's design note,
 checks stay rules, the number words are generated, and the model's second reading is a proposal that real deeds
 will decide. It is not in the product.
 
-**Since then:** the same checks were put to real documents the next day. The rules do report things on real
-answers, and the model's second reading flags far too much there: see
+On real answers the rules do report things, and the model's second reading flags far too much: see
 [A round on real documents](2026-11-real-documents.md).
 
 ## In short
