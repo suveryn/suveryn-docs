@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Sūveryn Labs Ltd.
-// suveryn-tracker#170: one JSON request per line on stdin {"text","culture"}; one JSON answer per line on stdout.
+// One JSON request per line on stdin {"text","culture"}; one JSON answer per line on stdout.
 using System.Text.Json;
 using Microsoft.Recognizers.Text.Number;
 using Microsoft.Recognizers.Text.DateTime;

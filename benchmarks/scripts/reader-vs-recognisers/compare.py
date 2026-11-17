@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Sūveryn Labs Ltd.
-"""Our reader of amounts, numbers and dates against standard recognisers (suveryn-tracker#170).
+"""Our reader of amounts, numbers and dates against standard recognisers.
 
 Reads every case of core's ``packages/harness/tests/reading_cases.json`` with core's reader (``values.read``) and with
 three tools, and counts the cases each reads as the file says. Each tool is told the case's language (``LANGUAGE``,
