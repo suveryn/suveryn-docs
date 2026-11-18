@@ -8,7 +8,6 @@ English. Tools made for this exist. This report counts how three of them read th
 | Date | 17 November 2026 |
 | Cases | core's [`reading_cases.json`](https://github.com/suveryn/suveryn-core/blob/2c5bfda/packages/harness/tests/reading_cases.json): 89 written forms, each with the one thing it means |
 | Script | [`scripts/reader-vs-recognisers/`](scripts/reader-vs-recognisers/) |
-| Issue | suveryn-tracker#170 |
 
 ## Results
 

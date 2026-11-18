@@ -240,7 +240,7 @@ longest documents, so every question fills the reading budget. Mistral only; the
 ## A fourth round, 17 November: Mistral within 24 GB
 
 The same documents and questions, on core at `b7760b9` (17 November), on an L40S (46 068 MiB) where a process
-held all but 24 564 MiB, as much as an RTX 4090 has (suveryn-tracker#133). Four ways to run Mistral, all with the full working memory (`-c 65536`), and Qwen
+held all but 24 564 MiB, as much as an RTX 4090 has. Four ways to run Mistral, all with the full working memory (`-c 65536`), and Qwen
 as the yardstick. The document reader and the model share the card.
 
 | | Qwen, as listed | Mistral, as listed | Mistral, 4-bit cache | Mistral, smaller file (IQ4_XS) | Smaller file, 4-bit cache |
@@ -268,7 +268,7 @@ Several people at the same moment on the longest documents, as on 13 November:
   leaves the most memory. Core lists it that way now. Not tried: an 8-bit cache for keys and 4-bit for values.
 - **Qwen stays the default**: 93 pass against 83, and half the items reported.
 - **With eight people at once, Qwen fails some questions too**, with an error from the model server, so it is not
-  Mistral's alone. Those questions should wait their turn: suveryn-tracker#187.
+  Mistral's alone. Those questions should wait their turn.
 
 ## What this does not show
 

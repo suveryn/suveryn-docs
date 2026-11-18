@@ -145,8 +145,8 @@ Read it top to bottom: who the playbook is (`id`, `pack`, `version`), where it f
 | `id` | yes | `playbook/<pack>/<name>`, lower case, digits and hyphens. Never changes once published: it ends up in every run's record, in every result document, and in the licence. |
 | `pack` | yes | `pack/<profession-jurisdiction>`, for example `pack/be-notary`. The `id` must start with `playbook/<that pack>/`. |
 | `version` | yes | `major.minor`, in quotes (`"1.1"`). A change that changes results is a new minor version; a change that makes an old run unreadable is a new major one. Every run records the version it ran under. |
-| `name` | yes | The English name. The result document is named by the words file's `title` in the run's language ("Deed intake 2026/0417 (1.1)"). |
-| `case_types` | yes | The case types the playbook fits, one or more: `sale`, `company-formation`, `estate`, `gift`, `marriage-contract`, `care-mandate` for notaries. It shows only in cases of those types. |
+| `name` | yes | The English name, up to 80 characters. The result document is named by the words file's `title` in the run's language ("Deed intake 2026/0417 (1.1)"). |
+| `case_types` | yes | The case types the playbook fits, one or more: `sale`, `company-formation`, `estate`, `gift`, `marriage-contract`, `care-mandate` for notaries, each once. It shows only in cases of those types. |
 | `facts` | yes | What the playbook wants to know; see below. At most 100. |
 | `instructions` | yes | What the model is told before it reads the documents, in English, up to 4 000 characters. Do **not** describe the answer's shape: sūveryn derives it from the facts and appends it. |
 | `steps` | yes | The routine; see below. At most 50. |
@@ -159,11 +159,11 @@ A fact is one thing the playbook needs to know. Each has:
 
 | Key | Required | What it is |
 |---|---|---|
-| `id` | yes | Lower-case letters, digits and underscores, starting with a letter (`agreement_date`). Stable: labels, questions and the run's record key on it. |
-| `ask` | yes | What the fact is, in the words the model gets, in English. Be concrete: "the date by which the notarial deed must be signed", not "deadline". |
+| `id` | yes | Lower-case letters, digits and underscores, starting with a letter, up to 50 characters (`agreement_date`). Stable: labels, questions and the run's record key on it. |
+| `ask` | yes | What the fact is, in the words the model gets, in English, up to 500 characters. Be concrete: "the date by which the notarial deed must be signed", not "deadline". |
 | `kind` | no | `text` (default), `amount`, `date`, `number`, `choice` or `list`. Decides which checks apply to the value the model reads; `choice` says the value is one of a few options; `list` says the fact has several entries (below). |
-| `of` | list only | What one entry is: a list of fields (each with `id`, `ask` and a plain `kind`), or one plain kind (`text`, `amount`, `date`, `number`) when each entry is a single value. |
-| `options` | choice only | The option ids, two to twelve (`[cash, in_kind, mixed]`). Each has its words in the labels (`"contribution_kind.cash": "In cash"`). |
+| `of` | list only | What one entry is: a list of fields (each with `id`, `ask` and a plain `kind`, never `choice`), or one plain kind (`text`, `amount`, `date`, `number`) when each entry is a single value. |
+| `options` | choice only | The option ids, two to twelve, each once, in lower-case letters, digits and underscores (`[cash, in_kind, mixed]`). Each has its words in the labels (`"contribution_kind.cash": "In cash"`). |
 | `format` | text only | A number with check digits (below). |
 | `counts_from` | date only | The date fact a term counts from (below). |
 | `share_of` | amount only | The amount fact a percentage is a share of (below). |
@@ -197,6 +197,8 @@ The model gives one entry per founder the documents name, in the order the docum
 
 A list holds records of plain values, or plain values, never lists: a deed has several parties each with a few details and no deeper, and a file an office can still write by hand stays one level deep. At most 20 fields per entry and 50 entries per list.
 
+Put the field that says who an entry is first, usually the name. When a document added later is read again, its entries are matched to the run's by who they are, never by their place: by a number with check digits when the entry has one (`format`, below), else by that first field.
+
 `number` is a figure without currency: a count, a share, a percentage. It is checked by meaning against the cited passage like an amount, short figures included ("3 aandelen"), which the chat's own figure check leaves alone as too ambiguous; in a playbook you asked for a count, so it is checked.
 
 People add entries. At a checkpoint, a list the documents named nothing of shows *Add* instead of *Fill in*, with one field per value of the entry; a list with entries offers one more under *More*. In words, "a third founder, Anna Peeters, 400 shares" adds one. Removing an entry is clearing its values.
@@ -212,9 +214,9 @@ A `choice` is a fact whose value is one of a few options:
     options: [cash, in_kind, mixed]
 ```
 
-The model reads it when the documents say it (it can only answer with an option); otherwise an `ask` step asks, and the thread offers the options as buttons. An answer in words ("in natura") is mapped to the option by its words in the run's language.
+The model reads it when the documents say it (it can only answer with an option); otherwise an `ask` step asks, and the thread offers the options as buttons. An answer in words ("in natura") is mapped to the option by its id or its words in the run's language. A choice is a fact of its own, never a list's field, and a check doesn't compare it. Give it an option for no or none: a document that says something was decided against or not chosen gives that option, and only a document that says nothing leaves the choice empty.
 
-Any step may carry `when`, one condition on one choice: `when: contribution_kind != in_kind` or `when: contribution_kind == cash`. When the step is reached and the condition doesn't hold, or the choice isn't known by then, the step is skipped and the playbook says why in the thread, naming the step with its words from the words file (`steps.<step id>`): "Bank certificate: not needed, Contribution is In kind." A skipped `read` makes no facts, so nothing asks about them later; a skipped `check` has no result. The choice a `when` turns on must be read or asked by a step before it. No and/or, no conditions on other kinds of fact: the day a routine needs more, it needs a decision, not a longer line.
+Any step may carry `when`, one condition on one choice: `when: contribution_kind != in_kind` or `when: contribution_kind == cash`. When the step is reached and the condition doesn't hold, or the choice isn't known by then, the step is skipped and the playbook says why in the thread, naming the step with its words from the words file (`steps.<step id>`): "Bank certificate: not needed, Contribution is In kind." A skipped `read` makes no facts, so nothing asks about them later; a skipped `check` has no result; a skipped `request` records no documents. The choice a `when` turns on must be read or asked by a step before it. A condition is at most 120 characters. No and/or, no conditions on other kinds of fact: the day a routine needs more, it needs a decision, not a longer line.
 
 ### What a fact does
 
@@ -229,7 +231,7 @@ Where a fact shows: in the thread, when the playbook asks about it; at the check
 
 **A number with check digits.** A text fact or a list's text field that holds a Belgian national register number, an enterprise number or an IBAN can say so: `format: national_register`, `enterprise`, `person_or_company` (a party that is a person or a company) or `iban`. sūveryn then checks the number's own check digits by arithmetic; one that can't be right, a typo or a misread scan, is flagged for the person at the checkpoint. Nothing is blocked, and no model is involved. In the example above, a party's `register` is one.
 
-**A date written as a term, an amount written as a share.** An agreement often writes "within four months of signing" or "ten per cent of the price". A date fact, or a list's date field, can name the date such a term counts from; an amount fact, or a list's amount field, can name the amount such a percentage is a share of. Both name a fact outside a list that isn't itself counted from, or a share of, another. sūveryn then works the value out by arithmetic and flags it for the person at the checkpoint, with how it was worked out. A term in working days is counted only when the pack brings a calendar; otherwise it stays as written. In the example above, `deposit` is a share of `price`, and `deed_deadline` counts from `agreement_date`.
+**A date written as a term, an amount written as a share.** An agreement often writes "within four months of signing" or "ten per cent of the price". A date fact, or a list's date field, can name the date such a term counts from; an amount fact, or a list's amount field, can name the amount such a percentage is a share of. Both name a fact outside a list that isn't itself counted from, or a share of, another. sūveryn then works the value out by arithmetic and flags it for the person at the checkpoint, with how it was worked out. A term is days, weeks, calendar months or years, after or before, in Dutch, French or English, with the number in figures or words; a term in working days is counted only when the pack brings a calendar (below). A share is one percentage and nothing else. Anything else (no date to count from, no direction, two terms or two percentages in one value) stays as written for the person. An amount the document gives as approximate is flagged too. In the example above, `deposit` is a share of `price`, and `deed_deadline` counts from `agreement_date`.
 
 Writing a good `ask`: name the thing exactly as a careful clerk would ("the date by which the notarial deed must be signed"), say what form you want ("full names as written"), and keep one fact per line of the deed. If a value can't be checked by a person at a glance, split it into two facts.
 
@@ -255,7 +257,7 @@ Thirteen, not more: every fact is a line the notary has to check, and a checkpoi
 
 A step is one thing the routine does. Steps run in the order they can: a step starts when every step it `needs` is done. By default a step needs the one before it, so a plain list runs top to bottom.
 
-Every step has an `id` (lower case, digits, hyphens or underscores) and a `kind`. The other keys depend on the kind; a key that belongs to another kind is an error.
+Every step has an `id` (lower-case letters, digits, hyphens or underscores, starting with a letter, up to 50 characters) and a `kind`. The other keys depend on the kind; a key that belongs to another kind is an error.
 
 ### `request`: ask for documents
 
@@ -263,9 +265,9 @@ The playbook puts a question in the thread and waits for a person's answer: the 
 
 | Key | What it is |
 |---|---|
-| `min` | How many uploaded documents the case needs before the step is done. Default 1. |
+| `min` | How many uploaded documents the case needs before the step is done, 1 to 50. Default 1. |
 | `allow_none` | `true` lets a person answer that there is no such document (*There is none*); the step is then done without one. Default `false`. |
-| `expects` | A name for what is asked (`bank_certificate`), unique among the routine's requests, so a `read` can be aimed at it. When a person answers a named request, the documents that came with the answer are recorded as its; with none attached, the case's uploaded documents no other request has yet. |
+| `expects` | A name for what is asked (`bank_certificate`), unique among the routine's requests, so a `read` can be aimed at it. When a person answers a named request, the documents that came with the answer are recorded as its; with none attached, the case's uploaded documents no other request has yet. A document that comes later can be added to a named request already answered; only the reads aimed at it are read again. |
 
 The question's words come from the words file (`questions.<step id>`). After uploading, a person presses continue; sūveryn counts the case's uploaded documents.
 
@@ -276,7 +278,7 @@ The model reads the case's uploaded documents for the facts named and cites the 
 | Key | What it is |
 |---|---|
 | `facts` | Which facts to read: a list of ids, or `all`. Required. A fact is read by one `read` step; the loader refuses a second. |
-| `documents` | The names (`expects`) of the requests whose documents this read reads: `[bank_certificate]`. Without it the read is over every document in the case. Aimed only at requests a person said have no document, the read makes no model call: its facts are not established, and an `ask` step can ask about them. |
+| `documents` | The names (`expects`) of requests this step `needs`, directly or through the steps it needs, whose documents it reads: `[bank_certificate]`. Without it the read is over every document in the case. Aimed only at requests a person said have no document, the read makes no model call: its facts are not established, and an `ask` step can ask about them. |
 
 **Aim each read at the documents that state its facts.** A read over every document in the case is the easy way and the risky one: an earlier deed in the file names other parties and another price, and in a long file it can fill the reading. Documents longer than one reading takes (about twenty pages together) are read by the passages that best match the read's facts; the facts still not found are then looked for in each document alone, in the order `documents` names them, and a fact found is never replaced by a later document. Put today's document first. The thread says when a document was read in part.
 
@@ -312,7 +314,7 @@ The run waits. A person sees every fact beside the passage it was read from, wit
 
 | Key | What it is |
 |---|---|
-| `by` | Who may pass it: `anyone_in_case` (anyone who contributes to the case), or `manager` (the case's manager only; in a notarial office the notary, while a clerk prepares and corrects). The case's roles, no other. |
+| `by` | Who may pass it: `anyone_in_case` (anyone who contributes to the case), or `manager` (the case's manager only; in a notarial office the notary, while a clerk prepares and corrects). The case's roles, no other. Others in the case can still correct the facts; only the manager confirms. |
 
 A routine must have a checkpoint, after a `read` or `ask` step and before any `produce`.
 
@@ -330,7 +332,7 @@ The server computes one comparison on the values as they stand and shows the res
 
 | Key | What it is |
 |---|---|
-| `rule` | One comparison: `sum(founders.shares) == shares`, `certified_amount == contribution`, `count(founders) >= 1`, `plan_date <= deed_date`, `latest(conditions.term) <= deed_deadline`. A side is a fact, the sum of a list's field, the count of a list's entries, the latest or the earliest date in a list's field (`latest(...)`, `earliest(...)`: "every condition's term falls before the deed" in one line; with no entries the check holds), or a number; both sides are of one kind (amount, number or date). Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`. Nothing else: no arithmetic, no and/or, no text. |
+| `rule` | One comparison: `sum(founders.shares) == shares`, `certified_amount == contribution`, `count(founders) >= 1`, `plan_date <= deed_date`, `latest(conditions.term) <= deed_deadline`. A side is an amount, number or date fact, the sum of a list's amount or number field, the count of a list's entries, the latest or the earliest date in a list's field (`latest(...)`, `earliest(...)`: "every condition's term falls before the deed" in one line; with no entries the check holds), or a number; both sides are of one kind (amount, number or date). A number alone takes the other side's kind, and two numbers without a fact are refused; a date compares only with a date fact or a latest or earliest. Up to 200 characters. Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`. Nothing else: no arithmetic, no and/or, no text. |
 
 ```yaml
   - id: shares_add_up
@@ -341,7 +343,7 @@ The server computes one comparison on the values as they stand and shows the res
     rule: latest(conditions.term) <= deed_deadline
 ```
 
-A result **holds**, **fails** (both sides as computed, so the notary sees 1050 against 1000) or is **open** when a value it needs is missing or gives no amount, number or date as written; it is recomputed whenever a value changes. A check comes after the read or ask steps that supply its facts. Its sentence per language is in the words file (`checks.<step id>`: "The founders' shares add up to the shares issued"); the file refuses a check without one.
+A result **holds**, **fails** (both sides as computed, so the notary sees 1050 against 1000) or is **open** when a value it needs is missing or gives no amount, number or date as written; it is recomputed whenever a value changes. A check comes after the `read` steps that read its facts. Its sentence per language is in the words file (`checks.<step id>`: "The founders' shares add up to the shares issued"); without one, the checkpoint shows the rule as written.
 
 ### `needs`
 
@@ -365,7 +367,31 @@ Beside the manifest, one JSON file per language in `text/` (`en.json`, `nl.json`
 }
 ```
 
-`labels` needs an entry for every fact and, for a list, for every field as `"<list id>.<field id>"` (`"founders.name": "Name"`); an entry's values are labelled from these: "Founder(s) 2 · Name". A choice's options have theirs as `"<fact id>.<option>"`. `checks` needs a sentence per `check` step, what holds when it holds. `steps` names steps for the line that says one was skipped (`"bank": "Bank certificate"`); a step without a name is called by its id. `questions` needs an entry for every `request` step and every `ask` step (a template with `{label}`, or one entry per fact as `"missing.price": "…"`; for a list, `"missing.founders"` is asked when the documents name no entries). The model never words a question: what people read is what you wrote.
+The loader refuses a words file without the playbook's `title`, `summary` and `labels`. `labels` needs an entry for every fact and, for a list, for every field as `"<list id>.<field id>"` (`"founders.name": "Name"`); an entry's values are labelled from these: "Founder(s) 2 · Name". A choice's options have theirs as `"<fact id>.<option>"`. `checks` needs a sentence per `check` step, what holds when it holds. `steps` names steps for the line that says one was skipped (`"bank": "Bank certificate"`); a step without a name is called by its id. `questions` needs an entry for every `request` step and every `ask` step (a template with `{label}`, or one entry per fact as `"missing.price": "…"`; for a list, `"missing.founders"` is asked when the documents name no entries). `factsTitle` is the heading of the list of facts beside the conversation ("Facts for the deed"); without it the screen says "All facts". Anything missing is shown by its id, so give every entry. The model never words a question: what people read is what you wrote.
+
+## A pack's working days
+
+A term in working days is counted on the pack's calendar, `calendar.yaml` beside its manifests, which every playbook of the pack uses. Which days are worked differs per country and per law, so sūveryn knows how to count them and nothing about any country. The calendar follows the pack, not the deed, and the note under every date worked out names it.
+
+```yaml
+name:
+  en: Monday to Friday, Belgian public holidays
+  nl: maandag tot vrijdag, Belgische feestdagen
+  fr: du lundi au vendredi, jours fériés belges
+workdays: [mon, tue, wed, thu, fri]
+fixed: ["01-01", "05-01", "07-21", "08-15", "11-01", "11-11", "12-25"]
+after_easter: [1, 39, 50]
+```
+
+| Key | Required | What it is |
+|---|---|---|
+| `name` | yes | What the note calls the calendar, in every language. |
+| `workdays` | yes | The weekdays worked: `mon` to `sun`. |
+| `fixed` | no | Holidays on the same date every year, month-day: `12-25`. |
+| `after_easter` | no | Holidays a number of days after Easter Sunday (1 is Easter Monday), from -60 to 70; sūveryn computes Easter. |
+| `dates` | no | Single holidays, year-month-day (`2027-05-06`), for feasts the rules above don't express. |
+
+A pack without a calendar leaves a term in working days as written, for a person: never counted on another country's holidays, nor on weekends alone.
 
 ## What happens when it runs
 
@@ -385,4 +411,4 @@ Editors that understand JSON Schema (VS Code with the YAML extension, among othe
 
 ## What is not in the format yet
 
-Checks on documents that disagree, conditions on anything but a choice, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in a later format.
+A step where the model drafts a passage for a person to confirm (`propose`), a model chosen per step, checks on documents that disagree, conditions on anything but a choice, documents from the office's own templates, and lists inside lists (on purpose: see Lists and numbers). They arrive in a later format.
