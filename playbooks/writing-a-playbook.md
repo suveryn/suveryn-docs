@@ -146,7 +146,7 @@ Read it top to bottom: who the playbook is (`id`, `pack`, `version`), where it f
 | `pack` | yes | `pack/<profession-jurisdiction>`, for example `pack/be-notary`. The `id` must start with `playbook/<that pack>/`. |
 | `version` | yes | `major.minor`, in quotes (`"1.1"`). A change that changes results is a new minor version; a change that makes an old run unreadable is a new major one. Every run records the version it ran under. |
 | `name` | yes | The English name, up to 80 characters. The result document is named by the words file's `title` in the run's language ("Deed intake 2026/0417 (1.1)"). |
-| `case_types` | yes | The case types the playbook fits, one or more: `sale`, `company-formation`, `estate`, `gift`, `marriage-contract`, `care-mandate` for notaries, each once. It shows only in cases of those types. |
+| `case_types` | yes | The case types the playbook fits, one or more, each once: types the pack declares (*A pack's case types*, below) or core does (`sale`, for deed intake). It shows only in cases of those types; a type nothing declares stops the pack from loading. |
 | `facts` | yes | What the playbook wants to know; see below. At most 100. |
 | `instructions` | yes | What the model is told before it reads the documents, in English, up to 4 000 characters. Do **not** describe the answer's shape: sūveryn derives it from the facts and appends it. |
 | `steps` | yes | The routine; see below. At most 50. |
@@ -392,6 +392,26 @@ after_easter: [1, 39, 50]
 | `dates` | no | Single holidays, year-month-day (`2027-05-06`), for feasts the rules above don't express. |
 
 A pack without a calendar leaves a term in working days as written, for a person: never counted on another country's holidays, nor on weekends alone.
+
+## A pack's case types
+
+The case types a pack brings are in `case-types.yaml` beside its manifests: the types an office can open a case as, in the order the new-case dialog offers them, with or without a playbook that fits. Their words are in the pack's words files, under `caseTypes`.
+
+```yaml
+pack: pack/be-notary
+case_types: [company-formation, estate, gift, marriage-contract, care-mandate]
+```
+
+```json
+"caseTypes": { "company-formation": "Oprichting vennootschap", "estate": "Nalatenschap" }
+```
+
+| Key | Required | What it is |
+|---|---|---|
+| `pack` | yes | The pack, as its manifests name it; its folder is named for it. |
+| `case_types` | yes | The ids, lower case, digits and hyphens, each once. A case stores the id, so a type's word can change at any time. |
+
+A type has one source on an appliance: a type core or another pack already declares stops the pack from loading. Core declares `sale`, which its reference playbook, deed intake, fits.
 
 ## What happens when it runs
 
