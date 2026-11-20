@@ -395,7 +395,7 @@ A pack without a calendar leaves a term in working days as written, for a person
 
 ## A pack's case types
 
-The case types a pack brings are in `case-types.yaml` beside its manifests: the types an office can open a case as, in the order the new-case dialog offers them, with or without a playbook that fits. Their words are in the pack's words files, under `caseTypes`.
+The case types a pack brings are in `case-types.yaml` beside its manifests: the types an office can open a case as, in the order sūveryn offers them, with or without a playbook that fits. Their words are in the pack's words files, under `caseTypes`: every type needs its word in each language, or the pack doesn't load.
 
 ```yaml
 pack: pack/be-notary
@@ -403,13 +403,16 @@ case_types: [company-formation, estate, gift, marriage-contract, care-mandate]
 ```
 
 ```json
-"caseTypes": { "company-formation": "Oprichting vennootschap", "estate": "Nalatenschap" }
+"caseTypes": {
+  "company-formation": "Oprichting vennootschap", "estate": "Nalatenschap", "gift": "Schenking",
+  "marriage-contract": "Huwelijkscontract", "care-mandate": "Zorgvolmacht"
+}
 ```
 
 | Key | Required | What it is |
 |---|---|---|
 | `pack` | yes | The pack, as its manifests name it; its folder is named for it. |
-| `case_types` | yes | The ids, lower case, digits and hyphens, each once. A case stores the id, so a type's word can change at any time. |
+| `case_types` | yes | The ids, each once, at most 100: a lower-case letter first, then lower case, digits and hyphens, up to 50 characters. A case stores the id, so a type's word can change at any time. |
 
 A type has one source on an appliance: a type core or another pack already declares stops the pack from loading. Core declares `sale`, which its reference playbook, deed intake, fits.
 
