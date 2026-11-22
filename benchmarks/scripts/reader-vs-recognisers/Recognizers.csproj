@@ -9,5 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Recognizers.Text.DateTime" Version="[1.8.13]" />
     <PackageReference Include="Microsoft.Recognizers.Text.Number" Version="[1.8.13]" />
+    <!-- Recognizers-Text 1.8.13 depends on NuGet.CommandLine 5.11.5, which has CVE-2024-0057 and GHSA-g4vj-cjjj-v7hg; this lifts it to 5.11.7, which has neither. -->
+    <PackageReference Include="NuGet.CommandLine" Version="[5.11.7]" />
   </ItemGroup>
 </Project>
