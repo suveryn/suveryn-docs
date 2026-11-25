@@ -26,6 +26,6 @@ For what sūveryn is and what is decided, start with the private [suveryn-handbo
 ## Verify
 
 ```bash
-npx --yes markdownlint-cli2 "**/*.md"
-npx --yes markdown-link-check --config .markdown-link-check.json CLAUDE.md   # or any changed file
+npx --yes markdownlint-cli2@0.23.2 "**/*.md"
+npx --yes markdown-link-check@3.14.2 --config .markdown-link-check.json CLAUDE.md   # or any changed file
 ```
