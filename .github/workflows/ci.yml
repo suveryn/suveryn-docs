@@ -5,19 +5,26 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   docs:
     name: Markdown lint + link check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Markdown lint
-        run: npx --yes markdownlint-cli2 "**/*.md"
+        # Pinned, as in core and the appliance, so a new release can't fail a pull request that
+        # changed nothing.
+        run: npx --yes markdownlint-cli2@0.23.2 "**/*.md"
 
       - name: Check for broken links
         # markdown-link-check (not linkinator): linkinator expects HTML-style crawling and reports a
@@ -25,21 +32,23 @@ jobs:
         # which GitHub renders as folder links) — markdown-link-check resolves those correctly since
         # it understands markdown links directly.
         run: |
-          npm install --no-save markdown-link-check
           find . -name "*.md" -not -path "./node_modules/*" -print0 \
-            | xargs -0 -n1 npx markdown-link-check --config .markdown-link-check.json
+            | xargs -0 -n1 npx --yes markdown-link-check@3.14.2 --config .markdown-link-check.json
 
   playbook-example:
     name: The playbook page's example is the shipped one
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: suveryn-core, for its deed intake
         uses: actions/checkout@v4
         with:
           repository: suveryn/suveryn-core
           path: core
+          persist-credentials: false
 
       - name: The example in Writing a playbook is the deed intake core ships
         run: python3 playbooks/check_example.py core
